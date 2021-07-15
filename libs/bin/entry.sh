@@ -143,18 +143,6 @@ function MW_STATUS() {
     [[ $? -eq $CALL_FAIL ]] && MW_log "ERROR" "$FUNCNAME check postgresql cluster status failed" && return $CALL_FAIL
   fi
 
-  if [ ${MW_Alias} == "rabbitmq" ];then
-    echo "--------------list cluster status & policies-----------"
-    docker exec rabbitmq${MW_Server} rabbitmqctl cluster_status
-    docker exec rabbitmq${MW_Server} rabbitmqctl list_policies
-    echo "--------------list exchanges------------------"
-    docker exec rabbitmq${MW_Server} rabbitmqctl list_exchanges
-    echo "--------------list queues------------------"
-    docker exec rabbitmq${MW_Server} rabbitmqctl list_queues
-    echo "--------------list bindings------------------"
-    docker exec rabbitmq${MW_Server} rabbitmqctl list_bindings
-    [[ $? -eq $CALL_FAIL ]] && MW_log "ERROR" "$FUNCNAME check cluster status failed" && return $CALL_FAIL
-  fi
   MW_log "INFO" "$FUNCNAME ${MW_Alias}${MW_Server} status is Health"
 }
 

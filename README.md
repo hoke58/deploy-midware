@@ -1,6 +1,6 @@
 ## Quick start
 
-This shell can be quickly start container of midware, like as mongodb, postgresql, rabbitmq etd.
+This shell can be quickly start container of midware, like as mongodb, postgresql, rabbitmq etc.
 
 ```sh
 cp cfg/dynamic.cfg.template cfg/dynamic.cfg
@@ -31,8 +31,8 @@ bash deploy-midware.sh
 
 Clone this project :
 
-	git clone https://github.com/hoke58/deploy-fabric.git
-	cd deploy-fabric
+	git clone https://github.com/hoke58/deploy-midware.git
+	cd deploy-midware
 
 Build package :
 

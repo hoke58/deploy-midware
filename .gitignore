@@ -2,3 +2,5 @@
 *.gz
 *.tar
 dynamic.cfg
+target
+images
