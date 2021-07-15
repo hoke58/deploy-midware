@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  mongodb:
+    image: ${DOCKER_REPO}/mongodb:${global_mongodb_version}
+    container_name: ${MW_ContainerNm}
+    hostname: ${MW_ContainerNm}
+    restart: always 
+    command: ["--replSet", "replcluster", "--bind_ip_all", "--keyFile", "/custom/mongo.key"]
+    environment:
+      HOST_UID: 1000
+      HOST_GID: 1000
+      LANG: en_US.UTF-8
+      TZ: Asia/Shanghai
+      MONGO_ADMIN: root
+      MONGO_ADMINPASS: root123
+    volumes:
+      - ./mongodb_data:/data/db
+      - ./mongodb_backup:/backup
+      - ./mongodb_shell:/mongodb_shell
+    ports:
+      - ${dynamic_mongodb_port}:27017
+    healthcheck:
+      test: test $$(echo "rs.initiate({_id:'replcluster',members:[{_id:0,host:\"mongodb1:27017\"},{_id:1,host:\"mongodb2:27017\"},{_id:2,host:\"mongodb3:27017\"}]}).ok || rs.status().ok" | mongo --port 27017 --quiet) -eq 1
+      interval: 30s
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    extra_hosts:
+      mongodb1: ${mongodb1_ip}
+      mongodb2: ${mongodb2_ip}
+      mongodb3: ${mongodb3_ip}

@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  keepalived:
+    image: hub.finrunchain.com/midware/keepalived:2.0.20-nginx
+    container_name: keepalived
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+      - NET_RAW
+    privileged: true
+    environment:
+      - KEEPALIVED_INTERFACE=ens192  # VRRP绑定的网络接口名称
+      - KEEPALIVED_PASSWORD=1234
+      - KEEPALIVED_PRIORITY=140      # 优先级
+      - KEEPALIVED_ROUTER_ID=52      # 实例标识
+      - KEEPALIVED_UNICAST_PEERS=10.10.255.31 # 单播领导的IP
+      - KEEPALIVED_VIRTUAL_IPS=10.10.255.203 # VIP 地址
+      - KEEPALIVED_STATE=BACKUP # 节点的初始状态
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://10.10.255.202:8181"] # URL 替换成 nginx 的代理地址
+    restart: on-failure:3

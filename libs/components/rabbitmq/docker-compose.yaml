@@ -1,0 +1,32 @@
+version: "3"                                                                                                                                       
+services: 
+  nginx:
+    image: ${DOCKER_REPO}/rabbitmq:${global_rabbitmq_version}
+    container_name: ${MW_ContainerNm}
+    hostname: ${MW_ContainerNm}
+    # network_mode: host
+    restart: always
+    ports:
+      - "5672:5672"
+      - "4369:4369"
+      - "1883:1883"
+      - "15672:15672"
+      - "25672:25672"
+    environment:
+      - LANG=en_US.UTF-8
+      - TZ=Asia/Shanghai      
+      - RABBITMQ_DEFAULT_USER=loc
+      - RABBITMQ_DEFAULT_PASS=loc
+      - RABBITMQ_ERLANG_COOKIE='ALWEDHDBZTQYWTJGTXWV' 
+      - RABBITMQ_NODENAME=rabbit@${MW_ContainerNm}
+    volumes:
+      - ./mq_mount:/var/lib/rabbitmq
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    healthcheck:
+      test: curl --fail -s http://localhost:15672 || exit 1
+      interval: 10s
+      start_period: 30s

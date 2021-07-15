@@ -1,0 +1,4 @@
+*.tgz
+*.gz
+*.tar
+dynamic.cfg

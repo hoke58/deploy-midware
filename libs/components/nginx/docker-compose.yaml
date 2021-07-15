@@ -1,0 +1,30 @@
+version: "3"                                                                                                                                       
+services: 
+  nginx:
+    image: ${DOCKER_REPO}/nginx:${global_nginx_version}
+    container_name: nginx
+    # network_mode: host
+    restart: always
+    environment:
+      LANG: en_US.UTF-8
+      TZ: Asia/Shanghai
+      HOST_UID: ${USER_UID}
+      HOST_GID: ${GROUP_GID}
+    ports:
+    - ${dynamic_nginx_port}:80
+    - 8282:8282
+    volumes:
+    - ./nginx.conf:/etc/nginx/nginx.conf
+    - ./html:/html
+    - ./logs:/etc/nginx/logs
+    - ./vhost:/etc/nginx/vhost
+    - ${dynamic_nginx_www}:/www
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    healthcheck:
+      test: curl --fail -s http://localhost:8282/basic_status || exit 1
+      interval: 10s
+      start_period: 30s

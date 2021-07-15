@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  mysql-server:
+    container_name: mysql-server
+    image: hub.finrunchain.com/midware/mysql-server:5.7
+    restart: always
+    environment:
+    - TZ=Asia/Shanghai
+    - MYSQL_ROOT_PASSWORD=Root@123
+    - MYSQL_DATABASE=cfca
+    - MYSQL_USER=mysqluser
+    - MYSQL_PASSWORD=mysqluser123
+    - MYSQL_LOG_CONSOLE=true
+    volumes:
+    - /data/mysql:/var/lib/mysql
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    ports:
+    - 3306:3306
