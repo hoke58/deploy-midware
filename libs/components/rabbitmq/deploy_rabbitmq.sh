@@ -2,7 +2,9 @@
 ACTION=${@:2}
 USER_UID=`id -u`
 GROUP_GID=`id -g`
+CONTAINER_ID=`docker ps -aq -f name=rabbit`
 CONTAINER_EXEC="docker exec -i $CONTAINER_ID bash -c"
+
 
 check_container() {
     if [ `docker ps -aq -f name=${MW_ContainerNm}|wc -l` -eq 0 ]; then
@@ -48,12 +50,14 @@ DeployRabbitmq() {
     sed -e "s/\${global_rabbitmq_version}/${global_rabbitmq_version}/g" \
     -e "s#\${DOCKER_REPO}#$global_docker_repo#g" \
     -e "s#\${MW_ContainerNm}#$MW_ContainerNm#g" \
+    -e "s#\${mongodb1_ip}#$dynamic_mongodb1_ip#g" \
+    -e "s#\${mongodb2_ip}#$dynamic_mongodb2_ip#g" \
     -i ${MW_Yml}
 
-    sleep 10
-    if [ $MW_Architecture == "cluster" -a $MW_Server -ne 1 ]; then
-        JoinCluster
-    fi
+#    sleep 10
+#    if [ $MW_Architecture == "cluster" -a $MW_Server -ne 1 ]; then
+#        JoinCluster
+#    fi
 }    
 
 CheckStatus() {
@@ -129,6 +133,13 @@ case $1 in
             exchange
         fi
     ;;     
+    3)
+        sleep 10
+        if [ $MW_Architecture == "cluster" -a $MW_Server -ne 1 ]; then
+            JoinCluster
+        fi
+    ;;
+
     *)
         colorEcho $RED "ERROR: invalid input"
         exit 1

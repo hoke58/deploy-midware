@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+
+  db:
+    container_name: ${MW_ContainerNm}
+    image: ${DOCKER_REPO}/postgresql:${global_postgresql_version}
+    restart: always
+    environment:
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres!@#456
+      - POSTGRES_DB=platform
+
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+      - ./sql:/opt
+    ports:
+      - 5432:5432
+    extra_hosts:
+      db1: ${mongodb1_ip} #postgresql的 primary  节点IP，按实际修改
+      db2: ${mongodb2_ip} #postgresql的 standby1 节点IP，按实际修改
+      db3: ${mongodb3_ip} #postgresql的 standby2 节点IP，按实际修改

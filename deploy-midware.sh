@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #***************************************************************
 #Desc: Universal Operation Console                             *
 #      entry point for all components                          *
@@ -7,6 +7,8 @@
 clear
 
 export mainShellPath=$(dirname `readlink -f ${BASH_SOURCE[0]}`)
+
+echo ${mainShellPath}
 
 consoleInit(){
  source ${mainShellPath}/cfg/common.cfg

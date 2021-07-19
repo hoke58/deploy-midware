@@ -30,3 +30,6 @@ services:
       test: curl --fail -s http://localhost:15672 || exit 1
       interval: 10s
       start_period: 30s
+    extra_hosts:
+      rabbitmq1: ${mongodb1_ip}
+      rabbitmq2: ${mongodb2_ip}

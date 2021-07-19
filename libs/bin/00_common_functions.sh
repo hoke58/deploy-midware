@@ -54,7 +54,7 @@ getTimestamp(){
 
 getParmByName(){
   local parmName=$1
-  #echo $parmName
+  #echo $parmName 
   local value=`eval echo '$'"${parmName}"`
   #value=`eval echo \${"${parmName}"}`
  
