@@ -8,8 +8,6 @@ clear
 
 export mainShellPath=$(dirname `readlink -f ${BASH_SOURCE[0]}`)
 
-echo ${mainShellPath}
-
 consoleInit(){
  source ${mainShellPath}/cfg/common.cfg
  source ${mainShellPath}/cfg/dynamic.cfg

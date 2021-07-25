@@ -193,7 +193,7 @@ function Up_Container() {
   fi
   ## add judge
   [[ ${MW_Alias} =~ "rabbitmq" ]] && . $MW_VersionDir/deploy_${MW_Alias}.sh 3
-  [[ ${MW_Alias} =~ "postgres" ]] && . $MW_VersionDir/deploy_${MW_Alias}.sh 2
+  [[ ${MW_Alias} =~ "postgres" ]] && . $MW_VersionDir/deploy_${MW_Alias}.sh 3
 }
 
 function Backup() {

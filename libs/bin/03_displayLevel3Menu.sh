@@ -71,7 +71,7 @@ getConfigedServer(){
     fi
 
     sw=""
-    if [ "${version}" == "${cfgVersion}" -o "${cfgImageId}" == "${imageId}" ];then
+    if [ "verion" == "cfgVersion" -o "${cfgImageId}" == "${imageId}" ];then
        export sw="Y"
     else
        export sw="N"

@@ -63,11 +63,36 @@ DeployPostgresql() {
 }    
 
 
+E_InitDatabase(){
+    bash ${MW_VersionDir}/
+}
+
 case $1 in
     1)
         DeployPostgresql
     ;;
     2)
+       ## 执行脚本
+       #echo "${MW_VersionDir}/initSql/${ACTION}"
+       if [ -f ${MW_VersionDir}/initSql/${ACTION} ];then 
+           case ${ACTION##*.} in
+           "sh"|"bash")
+               bash ${MW_VersionDir}/initSql/${ACTION}
+           ;;
+           "sql")
+               cp -r ${MW_VersionDir}/initSql/${ACTION} ${MW_WkDir}/sql/
+               sleep 3
+               docker exec -u postgres postgresql ls /opt/
+               echo ---------------
+               docker exec -u postgres postgresql psql -f /opt/${ACTION}
+           ;;
+           esac
+       else
+           colorEcho $RED "ERROR: invalid input($LINENO)"
+           exit 1
+       fi 
+    ;;
+    3)
         if [ $MW_Server == "1" ]; then
             set_master
         elif [ $MW_Server == "2" -o $MW_Server == "3" ]; then

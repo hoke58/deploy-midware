@@ -31,5 +31,5 @@ services:
       interval: 10s
       start_period: 30s
     extra_hosts:
-      rabbitmq1: ${mongodb1_ip}
-      rabbitmq2: ${mongodb2_ip}
+      mq0_org1: ${mongodb1_ip}
+      mq1_org1: ${mongodb2_ip}

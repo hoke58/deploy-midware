@@ -104,7 +104,7 @@ lvl2Select(){
          read  -p "Press Enter or Input File name:" cmd1 
          flag=$(echo "$cmd1" |grep -E "^$|*\.sql$|*\.sh|*\.bash$|*\.js$" |wc -l)
          if [ $flag -eq 1 ];then
-            if [ -z $cmd ]; then
+            if [ -z $cmd1 ]; then
                lvl2_selected_cmd="none"
             else
                lvl2_selected_cmd="$cmd1"
