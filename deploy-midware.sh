@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #***************************************************************
 #Desc: Universal Operation Console                             *
 #      entry point for all components                          *

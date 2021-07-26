@@ -4,9 +4,9 @@ export dynamic_install_userHome=/home/hoke  #用户根目录路径，即部署�
 # -----------------------------------------------------------------------
 
 # Mongodb ----------------------------------------------------------------
-export dynamic_mongodb1_ip=192.168.8.171
-export dynamic_mongodb2_ip=10.10.255.202
-export dynamic_mongodb3_ip=10.10.255.13
+export dynamic_mongodb1_ip=10.10.255.14
+export dynamic_mongodb2_ip=10.10.7.12
+export dynamic_mongodb3_ip=10.10.7.13
 export dynamic_mongodb_numOfServers=3    # 值为1为单机模式
 export dynamic_mongodb_port=$global_mongodb_port          #默认27017
 
@@ -16,6 +16,8 @@ export dynamic_postgresql_port=$global_postgresql_port             #默认5432
 export dynamic_postgresql1_ip=$dynamic_mongodb1_ip  #默认mongodb1同机器部署 
 export dynamic_postgresql2_ip=$dynamic_mongodb2_ip  #默认mongodb2同机器部署 
 export dynamic_postgresql3_ip=$dynamic_mongodb3_ip  #默认mongodb3同机器部署
+export POSTGRES_REPLICATION_USER=pguser
+export POSTGRES_REPLICATION_PASSWORD=pguser123
 
 # RabbitMQ --------------------------------------------------------------
 export dynamic_rabbitmq_numOfServers=2 # 值为1为单机模式

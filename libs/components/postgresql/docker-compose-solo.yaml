@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+
+  db:
+    container_name: ${MW_ContainerNm}
+    image: ${DOCKER_REPO}/postgresql:${global_postgresql_version}
+    restart: always
+    environment:
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres!@#456
+      - POSTGRES_DB=platform
+
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+      - ./sql:/opt
+    ports:
+      - 5432:5432
