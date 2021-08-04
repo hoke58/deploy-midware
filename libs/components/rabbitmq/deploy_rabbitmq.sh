@@ -45,13 +45,13 @@ fi
 
 DeployRabbitmq() {
     mkdir -p ${MW_WkDir}/mq_mount
-    \cp -rf ${MW_VersionDir}/docker-compose.yaml ${MW_Yml}
+    \cp -rf ${MW_VersionDir}/docker-compose-${MW_Architecture}.yaml ${MW_Yml}
 
     sed -e "s/\${global_rabbitmq_version}/${global_rabbitmq_version}/g" \
     -e "s#\${DOCKER_REPO}#$global_docker_repo#g" \
     -e "s#\${MW_ContainerNm}#$MW_ContainerNm#g" \
-    -e "s#\${mongodb1_ip}#$dynamic_mongodb1_ip#g" \
-    -e "s#\${mongodb2_ip}#$dynamic_mongodb2_ip#g" \
+    -e "s#\${mq0_org1_ip}#$dynamic_rabbitmq1_ip#g" \
+    -e "s#\${mq1_org1_ip}#$dynamic_rabbitmq2_ip#g" \
     -i ${MW_Yml}
 
 #    sleep 10
@@ -139,7 +139,6 @@ case $1 in
             JoinCluster
         fi
     ;;
-
     *)
         colorEcho $RED "ERROR: invalid input"
         exit 1

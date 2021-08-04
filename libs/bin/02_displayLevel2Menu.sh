@@ -1,3 +1,4 @@
+#!/bin/bash
 lvl2ShellPath=$(dirname `readlink -f ${BASH_SOURCE[0]}`)
 source ${lvl2ShellPath}/03_displayLevel3Menu.sh
  

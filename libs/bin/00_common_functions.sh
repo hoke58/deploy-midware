@@ -1,3 +1,4 @@
+#!/bin/bash
 export comm_prefix1="dynamic_"
 export comm_prefix3="global_"
 

@@ -1,6 +1,6 @@
 version: "3"                                                                                                                                       
 services: 
-  nginx:
+  rabbitmq:
     image: ${DOCKER_REPO}/rabbitmq:${global_rabbitmq_version}
     container_name: ${MW_ContainerNm}
     hostname: ${MW_ContainerNm}
@@ -30,6 +30,3 @@ services:
       test: curl --fail -s http://localhost:15672 || exit 1
       interval: 10s
       start_period: 30s
-    extra_hosts:
-      mq0_org1: ${mongodb1_ip}
-      mq1_org1: ${mongodb2_ip}

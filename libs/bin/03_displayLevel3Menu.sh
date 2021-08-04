@@ -1,3 +1,4 @@
+#!/bin/bash
 getConfigedServer(){
 
    lvl3_svr_mode="cluster"
