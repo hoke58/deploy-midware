@@ -9,7 +9,18 @@ services:
     environment:
       - POSTGRES_USERNAME=postgres
       - POSTGRES_PASSWORD=postgres!@#456
-      - POSTGRES_DB=platform
+      - HOST_UID=1000
+#      - POSTGRES_DB=platform
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+
+    healthcheck:
+      test: test -f /var/lib/postgresql/data/postmaster.pid 
+      interval: 30s
+      start_period: 60s
 
     volumes:
       - ./data/postgresql:/var/lib/postgresql/data

@@ -18,7 +18,7 @@ set_master() {
         exit 1
     else 
         sleep 5
-        docker exec -u postgres postgresql psql -c "CREATE ROLE $POSTGRES_REPLICATION_USER REPLICATION LOGIN PASSWORD '$POSTGRES_REPLICATION_PASSWORD';"
+        docker exec -u postgres postgresql psql -c "CREATE ROLE $dynamic_postgres_replication_user REPLICATION LOGIN PASSWORD '$dynamic_postgres_replication_password';"
         docker exec -u postgres postgresql sed -i 's/max_connections = 100\>/max_connections = 1000/' /var/lib/postgresql/data/postgresql.conf 
         docker exec -u postgres postgresql sed -i 's/#password_encryption/password_encryption/' /var/lib/postgresql/data/postgresql.conf 
         docker exec -u postgres postgresql sed -i 's/#wal_level/wal_level/' /var/lib/postgresql/data/postgresql.conf 
@@ -28,7 +28,7 @@ set_master() {
         docker exec -u postgres postgresql sed -i 's/#hot_standby = on/hot_standby = on/' /var/lib/postgresql/data/postgresql.conf
         docker exec -u postgres postgresql sed -i "s/#synchronous_standby_names = ''/synchronous_standby_names = 'standby01,standby02'/" /var/lib/postgresql/data/postgresql.conf
         docker exec -u postgres postgresql sed -i "s|timezone = 'Etc/UTC'|timezone = 'Asia/Shanghai'|" /var/lib/postgresql/data/postgresql.conf
-        docker exec -u postgres postgresql sed -i "$ a\host replication ${POSTGRES_REPLICATION_USER} 0.0.0.0\/0 trust" /var/lib/postgresql/data/pg_hba.conf
+        docker exec -u postgres postgresql sed -i "$ a\host replication ${dynamic_postgres_replication_user} 0.0.0.0\/0 trust" /var/lib/postgresql/data/pg_hba.conf
         docker restart postgresql
         sleep 5
         docker exec -u postgres postgresql psql -c "SELECT pg_start_backup('base', true)"
@@ -43,7 +43,7 @@ set_slave() {
     else 
         sleep 5
         docker exec postgresql sh -c 'rm -rf /var/lib/postgresql/data/*'
-        docker exec postgresql pg_basebackup -h db1 -p $global_postgresql_port -U $POSTGRES_REPLICATION_USER -D /var/lib/postgresql/data  -X stream -P -v -R -w -C -S ${standby}
+        docker exec postgresql pg_basebackup -h db1 -p $global_postgresql_port -U $dynamic_postgres_replication_user -D /var/lib/postgresql/data  -X stream -P -v -R -w -C -S ${standby}
         docker restart postgresql
     fi
 }
@@ -51,14 +51,17 @@ set_slave() {
 
 DeployPostgresql() {
     mkdir -p ${MW_WkDir}/data
-    \cp -rf ${MW_VersionDir}/docker-compose.yaml ${MW_Yml}
-
+    [ ${dynamic_postgresql_numOfServers} -eq 1 ] && MOD="solo" || MOD="cluster"
+    \cp -rf ${MW_VersionDir}/docker-compose-${MOD}.yaml ${MW_Yml}
+    if [ $MOD == "cluster" ];then
+        [ $MW_Server == "2" -o $MW_Server == "3" ] && sed -i '/test/s/-a/#/' ${MW_Yml}
+    fi
     sed -e "s/\${global_postgresql_version}/${global_postgresql_version}/g" \
     -e "s#\${DOCKER_REPO}#$global_docker_repo#g" \
     -e "s#\${MW_ContainerNm}#$MW_ContainerNm#g" \
-    -e "s#\${mongodb1_ip}#$dynamic_mongodb1_ip#g" \
-    -e "s#\${mongodb2_ip}#$dynamic_mongodb2_ip#g" \
-    -e "s#\${mongodb3_ip}#$dynamic_mongodb3_ip#g" \
+    -e "s#\${postgresql1_ip}#$dynamic_postgresql1_ip#g" \
+    -e "s#\${postgresql2_ip}#$dynamic_postgresql2_ip#g" \
+    -e "s#\${postgresql3_ip}#$dynamic_postgresql2_ip#g" \
     -i ${MW_Yml}
 }    
 
@@ -93,6 +96,17 @@ case $1 in
        fi 
     ;;
     3)
+        BAK_SQL=all-`date +%F_%H%M`.sql
+        mkdir -p ${MW_WkDir}/backup
+        docker exec postgresql pg_dumpall -U postgres > ${MW_WkDir}/backup/$BAK_SQL
+        tail ${MW_WkDir}/backup/$BAK_SQL |grep -q "PostgreSQL database cluster dump complete"
+        if [ $? -eq 0 ];then
+            colorEcho $GREEN Backup Successfully!
+        else
+            colorEcho $RED Wrong!! Please checking!
+        fi
+    ;;
+    4)
         if [ $MW_Server == "1" ]; then
             set_master
         elif [ $MW_Server == "2" -o $MW_Server == "3" ]; then
