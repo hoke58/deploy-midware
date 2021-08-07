@@ -102,7 +102,6 @@ function MW_LoadImg() {
 
         else
             docker load -i ${MW_ImgDir}/${MW_ImgFile}
-            colorEcho "${GREEN}" "Image load OK !"
             [[ $? -ne 0 ]] && MW_log "ERROR" "$FUNCTION load image failed " && return $CALL_FAL || return $CALL_SUCC
         fi
     fi
