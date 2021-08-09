@@ -88,20 +88,23 @@ function MW_chkVersion() {
 }
 
 function MW_LoadImg() {
-  echo $MW_ImgVersion
-  curl --fail -s https://$global_docker_repo &>/dev/null
-  check_hub_result=$?
-  if [ $check_hub_result -ne 0 ]; then
-    if [ ! -f ${MW_ImgDir}/${MW_ImgFile} ];then
-      MW_log "ERROR" "$FUNCTION image file ${MW_ImgDir}/${MW_ImgFile} not find, or cannot pull $global_docker_repo/$MW_Alias:${MW_ImgVersion}" 
-      return $CALL_FAIL
-    fi
+    colorEcho "${GREEN}" "$MW_Alias: $MW_ImgVersion"
     local FILTER_IMAGEID=`docker images |grep $MW_ImgID|awk '{print $3}'`
-    if [ -z $FILTER_IMAGEID ]; then   
-      docker load -i ${MW_ImgDir}/${MW_ImgFile}
-      [[ $? -ne 0 ]] && MW_log "ERROR" "$FUNCTION load image failed " && return $CALL_FAL
+    if [ -z $FILTER_IMAGEID ]; then
+        if [ ! -f ${MW_ImgDir}/${MW_ImgFile} ];then
+            curl --fail --connect-timeout 5 -s https://$global_docker_repo &>/dev/null
+            check_hub_result=$?
+            if [ $check_hub_result -ne 0 ]; then
+                MW_log "ERROR" "$FUNCTION image file ${MW_ImgDir}/${MW_ImgFile} not find, or cannot pull $global_docker_repo/$MW_Alias:${MW_ImgVersion}"
+                return $CALL_FAIL
+            fi
+            colorEcho "${GREEN}" "$MW_Alias: $MW_ImgVersion will get it from harbor!"
+
+        else
+            docker load -i ${MW_ImgDir}/${MW_ImgFile}
+            [[ $? -ne 0 ]] && MW_log "ERROR" "$FUNCTION load image failed " && return $CALL_FAL || return $CALL_SUCC
+        fi
     fi
-  fi
 }
 
 function CM_getDockerInfo() {
@@ -193,7 +196,7 @@ function Up_Container() {
   fi
   ## add judge
   [[ ${MW_Alias} =~ "rabbitmq" ]] && . $MW_VersionDir/deploy_${MW_Alias}.sh 3
-  [[ ${MW_Alias} =~ "postgres" ]] && . $MW_VersionDir/deploy_${MW_Alias}.sh 3
+  [[ ${MW_Alias} =~ "postgres" ]] && [[ ${dynamic_postgresql_numOfServers} -ne 1 ]] && . $MW_VersionDir/deploy_${MW_Alias}.sh 4
 }
 
 function Backup() {
