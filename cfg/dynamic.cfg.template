@@ -7,7 +7,7 @@ export dynamic_install_userHome=/home/blockchain   #用户根目录路径，即�
 export dynamic_mongodb1_ip=10.10.255.14
 export dynamic_mongodb2_ip=10.10.255.0
 export dynamic_mongodb3_ip=10.10.7.13
-export dynamic_mongodb_numOfServers=1    # 值为1为单机模式
+export dynamic_mongodb_numOfServers=3    # 值为1为单机模式
 export dynamic_mongodb_port=$global_mongodb_port          #默认27017
 
 # Postgresql ------------------------------------------------------------

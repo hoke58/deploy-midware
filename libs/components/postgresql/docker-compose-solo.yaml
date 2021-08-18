@@ -9,7 +9,7 @@ services:
     environment:
       - POSTGRES_USERNAME=postgres
       - POSTGRES_PASSWORD=postgres!@#456
-      - HOST_UID=1000
+      - HOST_UID=USER_UID
 #      - POSTGRES_DB=platform
 
     logging:
