@@ -57,13 +57,18 @@ DeployPostgresql() {
         [ $MW_Server == "2" -o $MW_Server == "3" ] && sed -i '/test/s/-a/#/' ${MW_Yml}
     fi
     sed -e "s/\${global_postgresql_version}/${global_postgresql_version}/g" \
-    -e "s#USER_UID#$USER_UID#" \
     -e "s#\${DOCKER_REPO}#$global_docker_repo#g" \
     -e "s#\${MW_ContainerNm}#$MW_ContainerNm#g" \
     -e "s#\${postgresql1_ip}#$dynamic_postgresql1_ip#g" \
     -e "s#\${postgresql2_ip}#$dynamic_postgresql2_ip#g" \
     -e "s#\${postgresql3_ip}#$dynamic_postgresql2_ip#g" \
     -i ${MW_Yml}
+
+    if [ ${USER_UID} -ne 0 ];then 
+        sed -i "s#USER_UID#$USER_UID#"  ${MW_Yml}
+    else
+        sed -i "s/USER_UID/1000/" ${MW_Yml}
+    fi
 }    
 
 
