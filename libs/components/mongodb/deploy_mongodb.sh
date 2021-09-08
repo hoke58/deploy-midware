@@ -32,17 +32,30 @@ DeployMongo() {
     -e "s#\${mongodb1_ip}#$dynamic_mongodb1_ip#g" \
     -e "s#\${mongodb2_ip}#$dynamic_mongodb2_ip#g" \
     -e "s#\${mongodb3_ip}#$dynamic_mongodb3_ip#g" \
+    -e "s#\${MONGO_ADMIN}#$dynamic_mongodb_admin#g" \
+    -e "s#\${MONGO_ADMINPASS}#$dynamic_mongodb_adminpass#g" \
     -i ${MW_Yml}
 }    
 
 CreateUser() {
+    if [ $MW_Architecture == "cluster" ]; then
+        $CONTAINER_EXEC "mongo --port 27017 admin --quiet /custom/creatRepl.js"
+        $CONTAINER_EXEC "mongo --port 27017 admin --quiet /custom/creatAdmin.js"
+    fi
     for db in ${databases[*]}; do
-        \cp -rf ${MW_VersionDir}/jsDefault/joinorg/createUser.js ${MW_WkDir}/mongodb_shell/create${db}User.js
+        # \cp -rf ${MW_VersionDir}/jsDefault/joinorg/createUser.js ${MW_WkDir}/mongodb_shell/create${db}User.js
 
-        sed -e "s/MONGO_USER/$mongo_user/g" \
-        -e "s/MONGO_PW/$mongo_pw/g" \
-        -e "s/DATABASE/$db/g" \
-        -i ${MW_WkDir}/mongodb_shell/create${db}User.js
+        # sed -e "s/MONGO_USER/$mongo_user/g" \
+        # -e "s/MONGO_PW/$mongo_pw/g" \
+        # -e "s/DATABASE/$db/g" \
+        # -i ${MW_WkDir}/mongodb_shell/create${db}User.js
+
+        cat > ${MW_WkDir}/mongodb_shell/create${db}User.js <<-EOF
+db.getSiblingDB("admin").auth("$dynamic_mongodb_admin", "$dynamic_mongodb_adminpass")
+db.getSiblingDB("$db")
+db.createUser({ user:"$mongo_user",pwd:"$mongo_pw",roles:[{role:"readWrite", db: "$db"}]})
+db.getSiblingDB("$db").auth("$mongo_user","$mongo_pw")
+EOF
 
         $CONTAINER_EXEC "mongo --port 27017 $db --quiet /mongodb_shell/create${db}User.js"
     done
@@ -77,6 +90,7 @@ case $1 in
         if [ $MONGO_JS == "none" ]; then
             CreateUser
         else
+            \cp -rf ${MW_VersionDir}/jsDefault/${MONGO_JS} ${MW_WkDir}/mongodb_shell/
             set -x
             $CONTAINER_MONGO_EXEC "mongo --port 27017 $db --quiet /mongodb_shell/${MONGO_JS}"
             set +x

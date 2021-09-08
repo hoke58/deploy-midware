@@ -101,7 +101,7 @@ lvl2Select(){
 
       if [ "${lvl1_selected_comp}" == "mongodb" -o "${lvl1_selected_comp}" == "postgresql" ]; then
          colorEcho $YELLOW "Directly press enter to initialize, if first installation"
-         colorEcho $YELLOW "Or input script file to execute"
+         colorEcho $YELLOW "Or input script filename to invoke script, one by one"
          read  -p "Press Enter or Input File name:" cmd1 
          flag=$(echo "$cmd1" |grep -E "^$|*\.sql$|*\.sh|*\.bash$|*\.js$" |wc -l)
          if [ $flag -eq 1 ];then

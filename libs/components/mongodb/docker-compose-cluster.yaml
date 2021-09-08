@@ -8,12 +8,12 @@ services:
     restart: always 
     command: ["--replSet", "replcluster", "--bind_ip_all", "--keyFile", "/custom/mongo.key"]
     environment:
-      HOST_UID: 1000
-      HOST_GID: 1000
+      HOST_UID: ${USER_UID}
+      HOST_GID: ${GROUP_GID}
       LANG: en_US.UTF-8
       TZ: Asia/Shanghai
-      MONGO_ADMIN: root
-      MONGO_ADMINPASS: root123
+      MONGO_ADMIN: ${MONGO_ADMIN}
+      MONGO_ADMINPASS: ${MONGO_ADMINPASS}
     volumes:
       - ./mongodb_data:/data/db
       - ./mongodb_backup:/backup
