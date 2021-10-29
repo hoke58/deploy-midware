@@ -18,7 +18,7 @@ services:
         max-size: "50m"
 
     healthcheck:
-      test: test -f /var/lib/postgresql/data/postmaster.pid 
+      test: "pg_isready -h localhost -p 5432 -q -U postgres" 
       interval: 30s
       start_period: 60s
 

@@ -10,6 +10,8 @@ MW_Map_Id2Dir=(
  [postgresql3]="postgresql"
  [rabbitmq1]="rabbitmq1"
  [rabbitmq2]="rabbitmq2"
+ [nginx1]="nginx"
+ [nginx2]="nginx"
 )
 
 declare -i CALL_SUCC=0

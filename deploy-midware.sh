@@ -19,5 +19,4 @@ function main(){
    consoleInit
    displayMainMenu
 }
-
 main
