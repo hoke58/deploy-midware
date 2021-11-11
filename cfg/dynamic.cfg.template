@@ -5,8 +5,8 @@ export dynamic_install_userHome=/home/blockchain   #用户根目录路径，即�
 
 # Mongodb ----------------------------------------------------------------
 export dynamic_mongodb1_ip=10.10.255.14
-export dynamic_mongodb2_ip=10.10.255.0
-export dynamic_mongodb3_ip=10.10.7.13
+export dynamic_mongodb2_ip=10.10.255.21
+export dynamic_mongodb3_ip=10.10.255.24
 export dynamic_mongodb_numOfServers=3    # 值为1为单机模式
 export dynamic_mongodb_port=$global_mongodb_port          #默认27017
 
@@ -16,8 +16,8 @@ export dynamic_postgresql_port=$global_postgresql_port             #默认5432
 export dynamic_postgresql1_ip=$dynamic_mongodb1_ip  #默认同mongodb1机器部署 
 export dynamic_postgresql2_ip=$dynamic_mongodb2_ip  #默认同mongodb2机器部署 
 export dynamic_postgresql3_ip=$dynamic_mongodb3_ip  #默认同mongodb3机器部署
-export dynamic_postgres_replication_user=pguser     #默认同步用户
-export dynamic_postgres_replication_password=pguser123  #默认同步用户密码
+export dynamic_postgres_replication_user=${global_postgresql_user}      #默认同步用户
+export dynamic_postgres_replication_password=${global_postgresql_pass}  #默认同步用户密码
 
 # RabbitMQ --------------------------------------------------------------
 export dynamic_rabbitmq_numOfServers=2 # 值为1为单机模式
@@ -25,11 +25,24 @@ export dynamic_rabbitmq_port=$global_rabbitmq_port           #默认5672
 export dynamic_rabbitmq1_ip=$dynamic_mongodb1_ip #默认同mongodb1机器部署 
 export dynamic_rabbitmq2_ip=$dynamic_mongodb2_ip #默认同mongodb2机器部署
 
+# Redis --------------------------------------------------------------------
+export dynamic_redis_numOfServers=2              # 值为1为单机模式
+export dynamic_redis_port=${global_redis_port}    # 默认6379
+export dynamic_redis1_ip=$dynamic_mongodb1_ip    #默认同mongodb1机器部署
+export dynamic_redis2_ip=$dynamic_mongodb2_ip    #默认同mongodb2机器部署
+export dynamic_redis_auth=${global_redis_auth}
+# Redis Sentinel ------------------------------------------------------------
+export dynamic_redis_sentinel_numOfServers=3 # 仅集群状态下使用哨兵
+export dynamic_redis_sentinel_port=${global_redis-sentinel_port}    # 默认26379
+export dynamic_redis_sentinel1_ip=$dynamic_mongodb1_ip              #默认同mongodb1机器部署
+export dynamic_redis_sentinel2_ip=$dynamic_mongodb2_ip              #默认同mongodb2机器部署
+export dynamic_redis_sentinel3_ip=$dynamic_mongodb3_ip              #默认同mongodb3机器部署
+export dynamic_redis_sentinel_auth=${global_redis_auth}
 # Nginx -----------------------------------------------------------------------
 export dynamic_nginx1_ip=10.10.255.14
 export dynamic_nginx2_ip=10.10.255.202
 export dynamic_nginx_numOfServers=1    # 值为1为单机模式
 export dynamic_nginx_port=$global_nginx_port  # nginx web 端口，默认 8080
-export dynamic_nginx_www=$dynamic_install_userHome/www  # 静态资源路径
+export dynamic_nginx_www=$dynamic_install_userHome/nginx/www  # 静态资源路径
 
 # Redis -----------------------------------------------------------------------

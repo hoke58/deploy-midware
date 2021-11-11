@@ -19,14 +19,15 @@ function displayMainMenu(){
   echo "************************* Level1 Main Menu **************************************"
   echo "*                     Operation Console version${console_Version}                              *"
   echo "*********************************************************************************"
-  echo "-------- 1/A：Nginx $(isInstalled nginx)"
-  echo "-------- 2/B：MongoDB $(isInstalled mongodb)"
-  echo "-------- 3/C：PostgreSQL $(isInstalled postgresql)"
-  echo "-------- 4/D：RabbitMQ $(isInstalled rabbitmq)"
-  echo "-------- 5/E：Redis $(isInstalled redis)"
-  echo "-------- 6/F：MySQL $(isInstalled mysql)"
-  echo "-------- 7/G：Keepalive $(isInstalled keepalive)"
-  echo "-------- 8/H：Display all local docker instances"
+  echo "-------- 0/A：Nginx $(isInstalled nginx)"
+  echo "-------- 1/B：MongoDB $(isInstalled mongodb)"
+  echo "-------- 2/C：PostgreSQL $(isInstalled postgresql)"
+  echo "-------- 3/D：RabbitMQ $(isInstalled rabbitmq)"
+  echo "-------- 4/E：Redis $(isInstalled redis-server)"
+  echo "-------- 5/F：Redis Sentinel $(isInstalled redis-sentinel)"
+  echo "-------- 6/G：MySQL $(isInstalled mysql)"
+  echo "-------- 7/H：Keepalive $(isInstalled keepalive)"
+  echo "-------- 8/I：Display all local docker instances"
   echo "-------- 9/Q：Quilt"
   echo "*********************************************************************************"
 
@@ -42,35 +43,39 @@ mainSelect()
   done
   
   case $option in
-    1|A|a)
+    0|A|a)
        lvl1_selected_comp=nginx
        displayLevel2Menu
     ;;
-    2|B|b)
+    1|B|b)
        lvl1_selected_comp=mongodb
        displayLevel2Menu
     ;;
-    3|C|c)
+    2|C|c)
        lvl1_selected_comp=postgresql
        displayLevel2Menu
     ;;
-    4|D|d)
+    3|D|d)
        lvl1_selected_comp=rabbitmq
        displayLevel2Menu
     ;;
-    5|E|e)
+    4|E|e)
        lvl1_selected_comp=redis
        displayLevel2Menu
     ;;
-    6|F|f)
+    5|F|f)
+       lvl1_selected_comp=redis_sentinel
+       displayLevel2Menu
+    ;;
+    6|G|g)
        lvl1_selected_comp=mysql
        displayLevel2Menu
     ;;
-    7|G|g)
+    7|H|h)
        lvl1_selected_comp=keepalive
        displayLevel2Menu
     ;;    
-    8|H|h)
+    8|I|i)
        lvl1_selected_comp=displayDockers
        displayAllInstances
        mainSelect
