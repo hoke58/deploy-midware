@@ -27,17 +27,16 @@ export dynamic_rabbitmq2_ip=$dynamic_mongodb2_ip #默认同mongodb2机器部署
 
 # Redis --------------------------------------------------------------------
 export dynamic_redis_numOfServers=2              # 值为1为单机模式
-export dynamic_redis_port=${global_redis_port}    # 默认6379
-export dynamic_redis1_ip=$dynamic_mongodb1_ip    #默认同mongodb1机器部署
-export dynamic_redis2_ip=$dynamic_mongodb2_ip    #默认同mongodb2机器部署
+export dynamic_redis_port=${global_redis_port}    # 默认6379,配置文件写死
+export dynamic_redis1_ip=${dynamic_mongodb1_ip}    #默认同mongodb1机器部署
+export dynamic_redis2_ip=${dynamic_mongodb2_ip}    #默认同mongodb2机器部署
 export dynamic_redis_auth=${global_redis_auth}
 # Redis Sentinel ------------------------------------------------------------
 export dynamic_redis_sentinel_numOfServers=3 # 仅集群状态下使用哨兵
-export dynamic_redis_sentinel_port=${global_redis-sentinel_port}    # 默认26379
-export dynamic_redis_sentinel1_ip=$dynamic_mongodb1_ip              #默认同mongodb1机器部署
-export dynamic_redis_sentinel2_ip=$dynamic_mongodb2_ip              #默认同mongodb2机器部署
-export dynamic_redis_sentinel3_ip=$dynamic_mongodb3_ip              #默认同mongodb3机器部署
-export dynamic_redis_sentinel_auth=${global_redis_auth}
+export dynamic_redis_sentinel_port=${global_redis-sentinel_port}    # 默认26379，配置文件写死
+export dynamic_redis_sentinel1_ip=${dynamic_mongodb1_ip}              #默认同mongodb1机器部署
+export dynamic_redis_sentinel2_ip=${dynamic_mongodb2_ip}              #默认同mongodb2机器部署
+export dynamic_redis_sentinel3_ip=${dynamic_mongodb3_ip}              #默认同mongodb3机器部署
 # Nginx -----------------------------------------------------------------------
 export dynamic_nginx1_ip=10.10.255.14
 export dynamic_nginx2_ip=10.10.255.202
