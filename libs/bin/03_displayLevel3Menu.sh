@@ -10,21 +10,19 @@ getConfigedServer(){
    local prefix="dynamic_${comp}"
    local prefix2="global_${comp}"
 
-   local parmName="${prefix}_mode";
-   value=$(getParmByName "${parmName}")
-   if [ $? -eq 0 ];then
-      lvl3_svr_mode=$value
-   fi
+#   local parmName="${prefix}_mode";
+#   value=$(getParmByName "${parmName}")
+#   if [ $? -eq 0 ];then
+#      lvl3_svr_mode=$value
+#   fi
 
-   parmName="${prefix}_numOfServers";
+   local  parmName="${prefix}_numOfServers";
    lvl3_svr_numOfServers=$(getParmByName "${parmName}")
    verifyResult $? "getParmByName failed!${lvl3_svr_numOfServers}"
-
    if [ -z "$lvl3_svr_numOfServers" ];then
       colorEcho $RED "${parmName} not configed!"
       exit 1
    fi
-
    if [ $lvl3_svr_numOfServers -gt 1 ];then
       lvl3_svr_mode="cluster"
    else

@@ -57,7 +57,7 @@ getParmByName(){
   local parmName=$1
   #echo $parmName
   local value=`eval echo '$'"${parmName}"`
-  #value=`eval echo \${"${parmName}"}`
+  #     value=`eval echo \${"${parmName}"}`
  
   if [ -z "${parmName}" ];then
      echo "ERROR:${parmName} not configed!"
@@ -151,7 +151,8 @@ getServerImageId(){
 }
 
 getLocalIps(){
-  local ips=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`	
+  #local ips=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`	
+  local ips=`ip a s |grep -Eo "inet (.*)/" |sed -r "s/(inet )([0-9.]{6,})(.*)/\2/"`	
   echo "$ips"
 }
 
