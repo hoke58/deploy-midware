@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  redis-sentinel:
+    image: docker_repo/image_name:image_version
+    restart: always
+    container_name: redis-sentinel
+    environment:
+    - TZ=Asia/Shanghai
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    sysctls:
+    - net.core.somaxconn=1024
+    volumes:
+    - ./conf:/usr/local/etc/redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    ports:
+    - 26379:26379

@@ -113,11 +113,13 @@ case $1 in
         fi
     ;;
     4)
-        if [ $MW_Server == "1" ]; then
-            set_master
-        elif [ $MW_Server == "2" -o $MW_Server == "3" ]; then
-            standby=standby0$((MW_Server - 1))
-            set_slave 
+        if [ ${dynamic_postgresql_numOfServers} -gt 1 ]; then
+            if [ $MW_Server == "1" ]; then
+                set_master
+            elif [ $MW_Server == "2" -o $MW_Server == "3" ]; then
+                standby=standby0$((MW_Server - 1))
+                set_slave 
+            fi
         fi
     ;;     
     *)

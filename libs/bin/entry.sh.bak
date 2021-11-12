@@ -23,7 +23,6 @@ MW_Map_Id2Dir=(
 declare -i CALL_SUCC=0
 declare -i CALL_FAIL=1
 
-# 此处变量通过前面菜单选择获得
 MW_Alias=${1?"mongodb/postgresql/rabbitmq/redis/redis-sentinel"}
 MW_func=${2?"function"}
 MW_Server=${3?"1/2/3"}
@@ -36,7 +35,7 @@ function MW_getEnvByAliasAndServer() {
   # COM_Time=$(date '+%H%M%s')
   COM_Time=$(date '+%H%M')
   # 组件目录
-  MW_VersionDir=${mainShellPath}/libs/components/${MW_Alias/_/-}
+  MW_VersionDir=${mainShellPath}/libs/components/${MW_Alias}
 
   # 容器名
   case "${MW_Alias}" in
@@ -220,7 +219,7 @@ function Up_Container() {
   [[ ${MW_Alias} =~ "rabbitmq" ]] && . $MW_VersionDir/deploy_${MW_Alias}.sh 3
   
   ## 判断是否集群
-  if [[ ${MW_Alias} =~ "postgres" ]]; then
+  if [ ${MW_Alias} == "postgres" -o ${MW_Alias} == "redis" ]; then
 	. $MW_VersionDir/deploy_${MW_Alias}.sh 4
   fi 
 }
