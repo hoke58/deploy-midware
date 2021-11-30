@@ -6,7 +6,7 @@ services:
     container_name: ${MW_ContainerNm}
     hostname: ${MW_ContainerNm}
     restart: always 
-    command: ["--replSet", "replcluster", "--bind_ip_all", "--keyFile", "/custom/mongo.key"]
+    command: ["--replSet", "replcluster", "--bind_ip_all", "--port", "${dynamic_mongodb_port}", "--keyFile", "/custom/mongo.key"]
     environment:
       HOST_UID: ${USER_UID}
       HOST_GID: ${GROUP_GID}
@@ -14,14 +14,15 @@ services:
       TZ: Asia/Shanghai
       MONGO_ADMIN: ${MONGO_ADMIN}
       MONGO_ADMINPASS: ${MONGO_ADMINPASS}
+      MONGO_PORT: ${dynamic_mongodb_port}
     volumes:
       - ./mongodb_data:/data/db
       - ./mongodb_backup:/backup
       - ./mongodb_shell:/mongodb_shell
     ports:
-      - ${dynamic_mongodb_port}:27017
+      - ${dynamic_mongodb_port}:${dynamic_mongodb_port}
     healthcheck:
-      test: test $$(echo "rs.status().ok || rs.initiate({_id:'replcluster',members:[{_id:0,host:\"mongodb1:27017\"},{_id:1,host:\"mongodb2:27017\"},{_id:2,host:\"mongodb3:27017\"}]}).ok" | mongo -u $$MONGO_ADMIN -p $$MONGO_ADMINPASS --port 27017 --quiet) -eq 1
+      test: test $$(echo "rs.status().ok || rs.initiate({_id:'replcluster',members:[{_id:0,host:\"mongodb1:${dynamic_mongodb_port}\"},{_id:1,host:\"mongodb2:${dynamic_mongodb_port}\"},{_id:2,host:\"mongodb3:${dynamic_mongodb_port}\"}]}).ok" | mongo -u $$MONGO_ADMIN -p $$MONGO_ADMINPASS --port ${dynamic_mongodb_port} --quiet) -eq 1
       interval: 30s
       start_period: 30s
     logging:

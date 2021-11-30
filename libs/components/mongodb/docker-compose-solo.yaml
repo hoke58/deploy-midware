@@ -6,7 +6,7 @@ services:
     container_name: ${MW_ContainerNm}
     hostname: ${MW_ContainerNm}
     restart: always 
-    command: ["--bind_ip_all"]
+    command: ["--bind_ip_all", "--port", "${dynamic_mongodb_port}"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root123
@@ -14,18 +14,19 @@ services:
       HOST_GID: ${GROUP_GID}
       LANG: en_US.UTF-8
       TZ: Asia/Shanghai
+      MONGO_PORT: ${dynamic_mongodb_port}
     volumes:
       - ./mongodb_data:/data/db
       - ./mongodb_backup:/backup
       - ./mongodb_shell:/mongodb_shell
     ports:
-      - ${dynamic_mongodb_port}:27017
+      - ${dynamic_mongodb_port}:${dynamic_mongodb_port}
     logging:
       driver: "json-file"
       options:
         max-size: "50m"
         max-file: "10"
     healthcheck:
-      test: test $$(mongo --port 27017 -u root -p root123 --authenticationDatabase admin --quiet --eval 'db.serverStatus().ok') -eq 1
+      test: test $$(mongo --port ${dynamic_mongodb_port} -u root -p root123 --authenticationDatabase admin --quiet --eval 'db.serverStatus().ok') -eq 1
       interval: 30s
       start_period: 60s

@@ -39,8 +39,8 @@ DeployMongo() {
 
 CreateUser() {
     if [ $MW_Architecture == "cluster" ]; then
-        $CONTAINER_EXEC "mongo --port 27017 admin --quiet /custom/creatRepl.js"
-        $CONTAINER_EXEC "mongo --port 27017 admin --quiet /custom/creatAdmin.js"
+        $CONTAINER_EXEC "mongo --port ${dynamic_mongodb_port} admin --quiet /custom/creatRepl.js"
+        $CONTAINER_EXEC "mongo --port ${dynamic_mongodb_port} admin --quiet /custom/creatAdmin.js"
     fi
     for db in ${databases[*]}; do
         # \cp -rf ${MW_VersionDir}/jsDefault/joinorg/createUser.js ${MW_WkDir}/mongodb_shell/create${db}User.js
@@ -57,7 +57,7 @@ db.createUser({ user:"$mongo_user",pwd:"$mongo_pw",roles:[{role:"readWrite", db:
 db.getSiblingDB("$db").auth("$mongo_user","$mongo_pw")
 EOF
 
-        $CONTAINER_EXEC "mongo --port 27017 $db --quiet /mongodb_shell/create${db}User.js"
+        $CONTAINER_EXEC "mongo --port ${dynamic_mongodb_port} $db --quiet /mongodb_shell/create${db}User.js"
     done
 }
 
@@ -72,7 +72,7 @@ BakMongo(){
             break
         fi
         colorEcho "===== Backuping $db... ====="
-        $CONTAINER_MONGO_EXEC "/usr/bin/mongodump --port 27017 -d $db --out $CONTAINER_BAKPATH -u $mongo_user -p $mongo_pw"
+        $CONTAINER_MONGO_EXEC "/usr/bin/mongodump --port ${dynamic_mongodb_port} -d $db --out $CONTAINER_BAKPATH -u $mongo_user -p $mongo_pw"
         [[ $? -eq 1 ]] && return 1
         
         nice -n 19 tar zcfv ${HOST_BAKPATH}/${db}.tgz -C ${HOST_BAKPATH} ${db}
@@ -92,7 +92,7 @@ case $1 in
         else
             \cp -rf ${MW_VersionDir}/jsDefault/${MONGO_JS} ${MW_WkDir}/mongodb_shell/
             set -x
-            $CONTAINER_MONGO_EXEC "mongo --port 27017 $db --quiet /mongodb_shell/${MONGO_JS}"
+            $CONTAINER_MONGO_EXEC "mongo --port ${dynamic_mongodb_port} $db --quiet /mongodb_shell/${MONGO_JS}"
             set +x
         fi
     ;;
