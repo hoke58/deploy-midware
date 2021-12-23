@@ -99,11 +99,25 @@ lvl2Select(){
 
       fi 
 
-      if [ "${lvl1_selected_comp}" == "mongodb" -o "${lvl1_selected_comp}" == "postgresql" ]; then
+      if [ "${lvl1_selected_comp}" == "mongodb" ]; then
          colorEcho $YELLOW "Directly press enter to initialize, if first installation"
          colorEcho $YELLOW "Or input script filename to invoke script, one by one"
          read  -p "Press Enter or Input File name:" cmd1 
          flag=$(echo "$cmd1" |grep -E "^$|*\.sql$|*\.sh|*\.bash$|*\.js$" |wc -l)
+         if [ $flag -eq 1 ];then
+            if [ -z $cmd1 ]; then
+               lvl2_selected_cmd="none"
+            else
+               lvl2_selected_cmd="$cmd1"
+            fi
+            displayLevel3Menu
+         fi
+      elif [ "${lvl1_selected_comp}" == "postgresql" ]; then
+         colorEcho $YELLOW "Directly press enter to initialize, if first installation"
+         colorEcho $YELLOW "Or input script filename to invoke script, one by one"
+         colorEcho $BLUE "[ init|i|default ] is easy to create User and database"
+         read  -p "Press Enter or Input File name:" cmd1
+         flag=$(echo "$cmd1" |grep -E "^$|*\.sql$|*\.sh|*\.bash$|^i$|init|default" |wc -l)
          if [ $flag -eq 1 ];then
             if [ -z $cmd1 ]; then
                lvl2_selected_cmd="none"

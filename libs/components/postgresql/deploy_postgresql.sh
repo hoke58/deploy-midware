@@ -3,7 +3,6 @@ ACTION=${@:2}
 USER_UID=`id -u`
 GROUP_GID=`id -g`
 
-
 check_container() {
     if [ `docker ps -aq -f name=${MW_ContainerNm}|wc -l` -eq 0 ]; then
         colorEcho $RED "Postgresql容器未安装成功，请执行 docker ps -a 检查容器"
@@ -82,7 +81,6 @@ case $1 in
     ;;
     2)
        ## 执行脚本
-       #echo "${MW_VersionDir}/initSql/${ACTION}"
        if [ -f ${MW_VersionDir}/initSql/${ACTION} ];then 
            case ${ACTION##*.} in
            "sh"|"bash")
@@ -95,10 +93,20 @@ case $1 in
                echo ---------------
                docker exec -u postgres postgresql psql -f /opt/${ACTION}
            ;;
+           "init"|"i"|"default")
+              ./initSql/init_db.sh 
+           ;;
            esac
        else
-           colorEcho $RED "ERROR: invalid input($LINENO)"
-           exit 1
+           case ${ACTION} in
+           "init"|"i"|"default")
+               ${MW_VersionDir}/initSql/init_db.sh
+            ;;
+           *)
+               colorEcho $RED "ERROR: invalid input($LINENO)"
+               exit 1
+           ;;
+           esac
        fi 
     ;;
     3)
