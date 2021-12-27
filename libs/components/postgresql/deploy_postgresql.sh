@@ -17,6 +17,9 @@ set_master() {
         exit 1
     else 
         sleep 5
+        if [ ${dynamic_postgres_replication_user} != ${global_postgresql_user} ];then
+            docker exec -u postgres postgresql psql -c "CREATE USER $global_postgresql_user PASSWORD '$global_postgresql_pass';"
+        fi
         docker exec -u postgres postgresql psql -c "CREATE ROLE $dynamic_postgres_replication_user REPLICATION LOGIN PASSWORD '$dynamic_postgres_replication_password';"
         docker exec -u postgres postgresql sed -i 's/max_connections = 100\>/max_connections = 1000/' /var/lib/postgresql/data/postgresql.conf 
         docker exec -u postgres postgresql sed -i 's/#password_encryption/password_encryption/' /var/lib/postgresql/data/postgresql.conf 
@@ -27,7 +30,7 @@ set_master() {
         docker exec -u postgres postgresql sed -i 's/#hot_standby = on/hot_standby = on/' /var/lib/postgresql/data/postgresql.conf
         docker exec -u postgres postgresql sed -i "s/#synchronous_standby_names = ''/synchronous_standby_names = 'standby01,standby02'/" /var/lib/postgresql/data/postgresql.conf
         docker exec -u postgres postgresql sed -i "s|timezone = 'Etc/UTC'|timezone = 'Asia/Shanghai'|" /var/lib/postgresql/data/postgresql.conf
-        docker exec -u postgres postgresql sed -i "$ a\host replication ${dynamic_postgres_replication_user} 0.0.0.0\/0 trust" /var/lib/postgresql/data/pg_hba.conf
+        docker exec -u postgres postgresql sed -i "$ a\host replication ${dynamic_postgres_replication_user} ${dynamic_postgres_replication_hosts} trust" /var/lib/postgresql/data/pg_hba.conf
         docker restart postgresql
         sleep 5
         docker exec -u postgres postgresql psql -c "SELECT pg_start_backup('base', true)"
@@ -58,6 +61,7 @@ DeployPostgresql() {
     sed -e "s/\${global_postgresql_version}/${global_postgresql_version}/g" \
     -e "s#\${DOCKER_REPO}#$global_docker_repo#g" \
     -e "s#\${MW_ContainerNm}#$MW_ContainerNm#g" \
+    -e "s#\${data_dir}#$dynamic_postgres_data_dir#g" \
     -e "s#\${postgresql1_ip}#$dynamic_postgresql1_ip#g" \
     -e "s#\${postgresql2_ip}#$dynamic_postgresql2_ip#g" \
     -e "s#\${postgresql3_ip}#$dynamic_postgresql2_ip#g" \

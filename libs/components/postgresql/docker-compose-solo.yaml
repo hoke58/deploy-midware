@@ -23,7 +23,7 @@ services:
       start_period: 60s
 
     volumes:
-      - ./data/postgresql:/var/lib/postgresql/data
+      - ${data_dir}:/var/lib/postgresql/data
       - ./sql:/opt
     ports:
       - 5432:5432

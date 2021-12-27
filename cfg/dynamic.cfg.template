@@ -7,10 +7,8 @@ export dynamic_install_userHome=/home/blockchain   #用户根目录路径，即�
 export dynamic_mongodb1_ip=10.10.255.14
 export dynamic_mongodb2_ip=10.10.255.21
 export dynamic_mongodb3_ip=10.10.255.24
-export dynamic_mongodb_numOfServers=3    # 值为1为单机模式
+export dynamic_mongodb_numOfServers=1    # 值为1为单机模式
 export dynamic_mongodb_port=$global_mongodb_port          #默认27017
-export dynamic_mongodb_admin=$global_mongodb_admin
-export dynamic_mongodb_adminpass=$global_mongodb_adminpass
 
 # Postgresql ------------------------------------------------------------
 export dynamic_postgresql_numOfServers=3  # 值为1为单机模式
@@ -18,6 +16,8 @@ export dynamic_postgresql_port=$global_postgresql_port             #默认5432
 export dynamic_postgresql1_ip=$dynamic_mongodb1_ip  #默认同mongodb1机器部署 
 export dynamic_postgresql2_ip=$dynamic_mongodb2_ip  #默认同mongodb2机器部署 
 export dynamic_postgresql3_ip=$dynamic_mongodb3_ip  #默认同mongodb3机器部署
+export dynamic_postgres_replication_hosts=0.0.0.0/0  # 0.0.0.0/0 表示所有主机
+export dynamic_postgres_data_dir="./data/postgresql2"
 export dynamic_postgres_replication_user=${global_postgresql_user}      #默认同步用户
 export dynamic_postgres_replication_password=${global_postgresql_pass}  #默认同步用户密码
 
