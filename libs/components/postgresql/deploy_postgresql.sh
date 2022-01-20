@@ -76,7 +76,50 @@ DeployPostgresql() {
 
 
 E_InitDatabase(){
-    bash ${MW_VersionDir}/
+    echo "Please check the directories, they will be as the databases's names."
+    echo "Remove the others."
+    echo -e "Local base directory: \e[31;31m${MW_WkDir}/sql/\e[0m"
+    
+    ls --color=auto -d ${MW_WkDir}/sql/*
+    read -p "Ready?(y/n) " Istat
+
+    case ${Istat} in
+    "y"|"Y"|"yes"|"YES")
+       users=$(docker exec postgresql psql -Upostgres -c "\du"|grep -w -v "postgres"|awk '{if(NR >3){print $1}}')
+       count=0
+       groups=()
+       for i in ${users[@]}
+       do
+         echo "$count) $i"
+         groups[$count]=$i
+         ((count += 1))
+       done
+       read -p "Select(1|2|3..) " userNum
+       # Check user
+       [ -z ${groups[userNum]} ] && echo "No user" && exit 4
+       # Check database
+       for directory in $(cd ${MW_WkDir}/sql/; ls -d */)
+       do
+           docker exec postgresql psql -Upostgres -l | grep -w "${directory%/}"
+           if [ $? -ne 0 ];then
+               docker exec -u postgres postgresql sh -c "createdb -E UTF8 -O postgres ${directory%/}"
+               docker exec -u postgres postgresql psql -c "alter database ${directory%/} owner to ${groups[userNum]};"
+           fi
+           Sqls=$(ls ${MW_WkDir}/sql/${directory%/})
+           for sql in ${Sqls[@]}
+           do
+               docker exec postgresql psql -U ${groups[userNum]} -d ${directory%/} -f /opt/${directory%/}/${sql}
+           done
+       done
+    ;;
+    "n"|"N"|"no"|"NO")
+        clear
+        E_InitDatabase 
+    ;;
+    *)
+        exit 886
+    ;;
+    esac
 }
 
 case $1 in
@@ -85,33 +128,24 @@ case $1 in
     ;;
     2)
        ## 执行脚本
-       if [ -f ${MW_VersionDir}/initSql/${ACTION} ];then 
-           case ${ACTION##*.} in
-           "sh"|"bash")
-               bash ${MW_VersionDir}/initSql/${ACTION}
-           ;;
-           "sql")
-               cp -r ${MW_VersionDir}/initSql/${ACTION} ${MW_WkDir}/sql/
-               sleep 3
-               docker exec -u postgres postgresql ls /opt/
-               echo ---------------
-               docker exec -u postgres postgresql psql -f /opt/${ACTION}
-           ;;
-           "init"|"i"|"default")
-              ./initSql/init_db.sh 
-           ;;
-           esac
-       else
-           case ${ACTION} in
-           "init"|"i"|"default")
-               ${MW_VersionDir}/initSql/init_db.sh
-            ;;
-           *)
-               colorEcho $RED "ERROR: invalid input($LINENO)"
-               exit 1
-           ;;
-           esac
-       fi 
+        case ${ACTION##*.} in
+        1)
+           pwd
+           $MW_VersionDir/initSql/init_db.sh ${MW_WkDir}
+        ;;
+        2)
+           E_InitDatabase
+        ;;
+        3)
+           echo "PG已有数据库信息"
+           docker exec postgresql psql -Upostgres -l
+           echo "PG已有用户"
+           docker exec postgresql psql -Upostgres -c "\du;"
+        ;;   
+        *)
+           colorEcho $RED "ERROR: invalid input"
+           exit 1
+        esac
     ;;
     3)
         BAK_SQL=all-`date +%F_%H%M`.sql

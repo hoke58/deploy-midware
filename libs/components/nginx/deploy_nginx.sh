@@ -246,7 +246,7 @@ proxy_pre(){
     # Set proxy domain
     while true; do
         echo -e "输入代理的域名，格式为http/https://域名（${red}请加前缀 http:// 或 https:// ${plain}）:"
-        read -p "(eg. https://org12-hbcc.bc.ccbft.com):" proxydomain
+        read -p "(eg. https://org12-bc.ft.com):" proxydomain
         if [ -n "${proxydomain}" ]; then
             echo
             echo "---------------------------------------------"

@@ -17,7 +17,7 @@ export dynamic_postgresql1_ip=$dynamic_mongodb1_ip  #默认同mongodb1机器部�
 export dynamic_postgresql2_ip=$dynamic_mongodb2_ip  #默认同mongodb2机器部署 
 export dynamic_postgresql3_ip=$dynamic_mongodb3_ip  #默认同mongodb3机器部署
 export dynamic_postgres_replication_hosts=0.0.0.0/0  # 0.0.0.0/0 表示所有主机
-export dynamic_postgres_data_dir="./data/postgresql2"
+export dynamic_postgres_data_dir="./data"
 export dynamic_postgres_replication_user=${global_postgresql_user}      #默认同步用户
 export dynamic_postgres_replication_password=${global_postgresql_pass}  #默认同步用户密码
 

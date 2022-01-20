@@ -115,17 +115,16 @@ lvl2Select(){
       elif [ "${lvl1_selected_comp}" == "postgresql" ]; then
          colorEcho $YELLOW "Directly press enter to initialize, if first installation"
          colorEcho $YELLOW "Or input script filename to invoke script, one by one"
-         colorEcho $BLUE "[ init|i|default ] is easy to create User and database"
-         read  -p "Press Enter or Input File name:" cmd1
-         flag=$(echo "$cmd1" |grep -E "^$|*\.sql$|*\.sh|*\.bash$|^i$|init|default" |wc -l)
-         if [ $flag -eq 1 ];then
-            if [ -z $cmd1 ]; then
-               lvl2_selected_cmd="none"
-            else
-               lvl2_selected_cmd="$cmd1"
-            fi
-            displayLevel3Menu
+         colorEcho $BLUE "\t1) Create User or database"
+         colorEcho $BLUE "\t2) Init Database SQL"
+         colorEcho $BLUE "\t3) Show database Info"
+         read  -p "Select :" cmd1
+         if [ -z $cmd1 ]; then
+            lvl2_selected_cmd="none"
+         else
+            lvl2_selected_cmd="$cmd1"
          fi
+         displayLevel3Menu
       elif [ "${lvl1_selected_comp}" == "nginx" -o "${lvl1_selected_comp}" == "rabbitmq" ]; then
          lvl2_selected_cmd="$EXCUTE_COMMAND"
          displayLevel3Menu
