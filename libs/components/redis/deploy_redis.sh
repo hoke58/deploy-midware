@@ -52,9 +52,6 @@ case $1 in
     2)
         echo EN!
     ;;
-    4)
-        :
-    ;;     
     *)
         colorEcho $RED "ERROR: invalid input"
         exit 1
