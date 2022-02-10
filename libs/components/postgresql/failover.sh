@@ -40,6 +40,7 @@ logging(){
 
 # 本机服务状态检查
 check_status (){
+    logging $FUNCNAME
     # 如果容器异常停止，先拉起来尝试下
     docker ps -f "name=^/postgresql" --format "{{.Names}}"|grep postgresql
     if [ $? -ne 0 ];then
@@ -48,6 +49,15 @@ check_status (){
         sleep 10
     fi
     logging "检查服务运作状态..."
+    status=$(docker exec -u postgres postgresql pg_controldata /var/lib/postgresql/data |grep "Database cluster state" |awk '{print $NF}')
+    if [ ${status} == "recovery" -a ${role} != ${master} ];then
+       :
+    elif [ ${status} == "production" -a ${role} == ${master} ];then
+       :
+    else
+       logging 状态错误，（recovery/production）
+       return 990
+    fi
     docker exec -u postgres postgresql pg_isready
     return $?
 }
@@ -59,21 +69,29 @@ check_another_slave(){
 }
 # 检查与 master 的链接
 check_master(){
+    logging $FUNCNAME
     getMaster=${1-${master}}
     ctimes=${2-3}
+    [ ${ctimes} -le 1 ] && return 4
+
     r1=`docker exec postgresql psql -h $getMaster -U postgres -c "select * from pg_is_in_recovery();" |head  -n 3 |tail -n1 |awk '{print $1}'`
+
     if [ "${r1}" == 'f' ];then
         repUser=$( docker exec postgresql psql -h $getMaster -U postgres -c "\du"|grep -w ${repuser})
         if [ ! -z "${repUser}" ];then
             logging "Master is ${getMaster}, it's OK"
             return 0
         else
-            logging master数据库状态异常，没有同步用户
-            return 6
+            sleep 2
+            check_master ${getMaster} $(( ctimes - 1))
+            if [ $? -ne 0 ];then
+                logging $getMaster master数据库状态异常，没有同步用户
+                return 6
+            fi
+            return 0
         fi
 
     else
-        [ ${ctimes} -le 0 ] && return 4
         sleep 2
         check_master ${getMaster} $(( ctimes -1 ))
     fi
@@ -85,13 +103,13 @@ check_master(){
 get_new_master(){
     sed -i '/failover.sh/s/^/#/' /var/spool/cron/$USER
     count=0
-    times=10
-    Stime=10
+    times=5
+    Stime=5
     while [ ${count} -lt ${times} ]
     do  
         for nod in ${db_pool[@]}
         do
-            if [ ${nod} != "${master}" ];then
+#            if [ ${nod} != "${master}" ];then
                 check_master ${nod}
                 if [ $? -eq 0 ];then
                     new_master=${nod}
@@ -99,7 +117,7 @@ get_new_master(){
                     logging "新master ${new_master}"
                     break 2
                 fi
-            fi
+#            fi
         done
         (( count += 1 ))
         # 如果暂未找到新的master，则延迟 10s 再进行探测
@@ -120,8 +138,8 @@ get_new_master(){
 up_to_master(){
     echo -e "\e[31;31m升级为新master...\e[0m"
     docker exec -u postgres postgresql pg_ctl  promote
-    docker-compose restart
     docker exec postgresql sed -i "3,$ d" /var/lib/postgresql/data/postgresql.auto.conf
+    #docker-compose restart
     docker exec -u postgres postgresql pg_controldata /var/lib/postgresql/data |grep -q "in production"
     if [ $? -eq 0 ];then
         logging "${role} 成功升级为新master主机！"
