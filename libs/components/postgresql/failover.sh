@@ -35,7 +35,7 @@ repuser=Repuser
 export PATH=DCOM
 
 logging(){
-   echo `date ` : ${*} >> ${log}
+   echo -e "`date ` : ${*}" >> ${log}
 }
 
 # 本机服务状态检查
@@ -43,15 +43,17 @@ check_status (){
     # 如果容器异常停止，先拉起来尝试下
     docker ps -f "name=^/postgresql" --format "{{.Names}}"|grep postgresql
     if [ $? -ne 0 ];then
+        logging "容器没有运行，重新启动..."
         docker-compose up -d
         sleep 10
     fi
+    logging "检查服务运作状态..."
     docker exec -u postgres postgresql pg_isready
     return $?
-
 }
 # 另一台从节点检查
 check_another_slave(){
+    logging "检查另一从节点状态..."
     docker exec postgresql psql -h $1 -U postgres -c "select * from pg_is_in_recovery();" 
     return $?
 }
@@ -61,8 +63,15 @@ check_master(){
     ctimes=${2-3}
     r1=`docker exec postgresql psql -h $getMaster -U postgres -c "select * from pg_is_in_recovery();" |head  -n 3 |tail -n1 |awk '{print $1}'`
     if [ "${r1}" == 'f' ];then
-        echo -e "Master is \e[31;31m${getMaster}\e[0m"
-        return 0
+        repUser=$( docker exec postgresql psql -h $getMaster -U postgres -c "\du"|grep -w ${repuser})
+        if [ ! -z "${repUser}" ];then
+            logging "Master is ${getMaster}, it's OK"
+            return 0
+        else
+            logging master数据库状态异常，没有同步用户
+            return 6
+        fi
+
     else
         [ ${ctimes} -le 0 ] && return 4
         sleep 2
@@ -124,9 +133,10 @@ up_to_master(){
            [ "${db_slot}" != "${role}"  ] &&  docker exec postgresql psql -U postgres -c "select pg_create_physical_replication_slot('${slots[${db_slot}]}');"
            set +x
         done
+        docker exec postgresql psql -U postgres -c "select slot_name,active,restart_lsn from pg_replication_slots;" &>> ${log}
     else
         logging "${role} 升级为新master失败！"
-        echo "${role} 升级为新master失败！" 
+        #echo "${role} 升级为新master失败！" 
         exit 66
     fi
 
@@ -149,7 +159,13 @@ change_judge(){
                 docker exec postgresql psql -U postgres -h ${new_master} -c "select pg_create_physical_replication_slot('${slots[${role}]}');"
             fi
             docker-compose  restart
-            [ $? -eq 0 ] && logging "Restart success" || logging "Restart failed"
+            if [ $? -eq 0 ];then
+                logging "Restart success"
+                docker exec postgresql psql -U postgres -h ${new_master} -c "select slot_name,active,restart_lsn from pg_replication_slots;" &>> ${log}
+            else
+                logging "Restart failed"
+            fi
+
         fi
     fi
 }
@@ -158,7 +174,8 @@ change_judge(){
 reset_pg (){
     docker-compose down
     data_dir=$(grep "/var/lib/postgresql/data" docker-compose.yaml |awk -F [:-] '{print $2}')
-    mv ${data_dir}{,-`date +%F-%H%M%S`-back}
+    mv ${data_dir%/}{,-`date +%F-%H%M%S`-back}
+    logging 备份数据目录 ${data_dir}
     docker-compose up -d 
     sleep 10
     logging  获取新的master
@@ -173,9 +190,7 @@ reset_pg (){
     logging 同步
 
     docker exec postgresql pg_basebackup -h ${new_master} -p 5432 -U ${repuser}  -D /var/lib/postgresql/data  ${args} ${slots[${role}]}
-#    docker exec postgresql pg_basebackup -h ${new_master} -p 5432 -U ${repuser}  -D /var/lib/postgresql/data -X stream -P -v -R -w -C -S ${slots[${role}]}
     docker-compose restart
-
 }
 
 main(){
@@ -183,7 +198,12 @@ main(){
     # 只检查容器服务是否健康
     if check_status ;then
        if [ "${role}" == "${master}" ];then
-           logging "Local is master, it's OK"
+           check_master
+           if [ $? -eq 0 ];then
+               logging "Local is master, it's OK"
+           else
+               reset_pg
+           fi
        else
            # 检查本地容器服务是否健康和 master 和另一台主机 是否能够正常通信
            # 如果只是与 master 通信异常，则根据预定义规则，切换新的 master

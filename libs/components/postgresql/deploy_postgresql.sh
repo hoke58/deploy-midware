@@ -68,7 +68,7 @@ DeployPostgresql() {
     if [ ${MOD} == "cluster" ];then
         \cp -rf ${MW_VersionDir}/failover.sh ${MW_WkDir}
         chmod +x ${MW_WkDir}/failover.sh
-        sed -i "/DCOM/s/DCOM/${PATH}/" ${MW_WkDir}/failover.sh
+        sed -i "s#DCOM#${PATH}#" ${MW_WkDir}/failover.sh
         echo "* * * * * /bin/bash ${MW_WkDir}/failover.sh" >> /var/spool/cron/$USER
 	echo "=================== Crontab ================"
         crontab -l
