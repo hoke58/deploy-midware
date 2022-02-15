@@ -9,6 +9,7 @@ services:
     environment:
       - POSTGRES_USERNAME=postgres
       - POSTGRES_PASSWORD=postgres!@#456
+      - PGPASSWORD=postgres!@#456
       - HOST_UID=USER_UID
 #      - POSTGRES_DB=platform
 
@@ -19,14 +20,15 @@ services:
       driver: "json-file"
       options:
         max-size: "50m"
+        max-file: "10"
 
     healthcheck:
-      test: test -f /var/lib/postgresql/data/postmaster.pid -a $$(psql -U postgres -c "select active from pg_replication_slots;"|sed -n '/f/p' |wc -l) -eq 0
-      interval: 30s
-      start_period: 60s
+      test: test pg_isready -a $$(psql -U postgres -c "select active from pg_replication_slots;"|sed -n '/f/p' |wc -l) -eq 0
+      interval: 10s
+      start_period: 10s
     ports:
       - 5432:5432
     extra_hosts:
       db1: ${postgresql1_ip} #postgresql的 primary  节点IP，按实际修改
-      db2: ${postgresql2_ip} #postgresql的 standby1 节点IP，按实际修改
-      db3: ${postgresql3_ip} #postgresql的 standby2 节点IP，按实际修改
+      db2: ${postgresql2_ip} #postgresql的 standby01 节点IP，按实际修改
+      db3: ${postgresql3_ip} #postgresql的 standby02 节点IP，按实际修改

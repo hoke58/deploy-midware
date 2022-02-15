@@ -35,6 +35,8 @@ set_master() {
         sleep 5
         docker exec -u postgres postgresql psql -c "SELECT pg_start_backup('base', true)"
     fi
+
+    sed -e "s#^role.*#role=db1#"  -e "s#^master.*#master=db1#" -e "s#^repuser.*#repuser=${dynamic_postgres_replication_user}#" -i ${MW_WkDir}/failover.sh
 }
 
 set_slave() {
@@ -44,10 +46,18 @@ set_slave() {
         exit 1
     else 
         sleep 5
+        docker exec postgresql psql -U postgres -h db1 -c "select * from pg_replication_slots;" |grep ${standby}
+        if [ $? -eq 0 ];then
+           args="-X stream -P -v -R -w -S"
+        else
+           args="-X stream -P -v -R -w -C -S"
+        fi
+
         docker exec postgresql sh -c 'rm -rf /var/lib/postgresql/data/*'
-        docker exec postgresql pg_basebackup -h db1 -p $global_postgresql_port -U $dynamic_postgres_replication_user -D /var/lib/postgresql/data  -X stream -P -v -R -w -C -S ${standby}
+        docker exec postgresql pg_basebackup -h db1 -p $global_postgresql_port -U $dynamic_postgres_replication_user -D /var/lib/postgresql/data  ${args} ${standby}
         docker restart postgresql
     fi
+    sed -e "s#^role.*#role=db${MW_Server}#"  -e "s#^master.*#master=db1#" -e "s#^repuser.*#repuser=${dynamic_postgres_replication_user}#" -i ${MW_WkDir}/failover.sh
 }
 
 
@@ -55,6 +65,15 @@ DeployPostgresql() {
     mkdir -p ${MW_WkDir}/data
     [ ${dynamic_postgresql_numOfServers} -eq 1 ] && MOD="solo" || MOD="cluster"
     \cp -rf ${MW_VersionDir}/docker-compose-${MOD}.yaml ${MW_Yml}
+    if [ ${MOD} == "cluster" ];then
+        \cp -rf ${MW_VersionDir}/failover.sh ${MW_WkDir}
+        chmod +x ${MW_WkDir}/failover.sh
+        sed -i "s#DCOM#${PATH}#" ${MW_WkDir}/failover.sh
+        echo "* * * * * /bin/bash ${MW_WkDir}/failover.sh" >> /var/spool/cron/$USER
+	echo "=================== Crontab ================"
+        crontab -l
+        echo "============================================"
+    fi
     if [ $MOD == "cluster" ];then
         [ $MW_Server == "2" -o $MW_Server == "3" ] && sed -i '/test/s/-a/#/' ${MW_Yml}
     fi
@@ -64,7 +83,7 @@ DeployPostgresql() {
     -e "s#\${data_dir}#$dynamic_postgres_data_dir#g" \
     -e "s#\${postgresql1_ip}#$dynamic_postgresql1_ip#g" \
     -e "s#\${postgresql2_ip}#$dynamic_postgresql2_ip#g" \
-    -e "s#\${postgresql3_ip}#$dynamic_postgresql2_ip#g" \
+    -e "s#\${postgresql3_ip}#$dynamic_postgresql3_ip#g" \
     -i ${MW_Yml}
 
     if [ ${USER_UID} -ne 0 ];then 

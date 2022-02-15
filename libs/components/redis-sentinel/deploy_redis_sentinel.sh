@@ -1,7 +1,5 @@
 #! /bin/bash
 ACTION=${@:2}
-USER_UID=`id -u`
-GROUP_GID=`id -g`
 
 
 check_container() {

@@ -16,11 +16,12 @@ services:
       driver: "json-file"
       options:
         max-size: "50m"
+        max-file: "10"
 
     healthcheck:
-      test: "pg_isready -h localhost -p 5432 -q -U postgres" 
-      interval: 30s
-      start_period: 60s
+      test: "pg_isready -h localhost -p 5432 -q" 
+      interval: 10s
+      start_period: 10s
 
     volumes:
       - ${data_dir}:/var/lib/postgresql/data
