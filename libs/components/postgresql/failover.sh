@@ -12,6 +12,8 @@
 
 # 重置异常的master节点，并且与新的master同步
 
+image="hub.finrunchain.com/midware/postgresql:12.7"
+
 # 事件改变记录
 log=pg_event.log
 script=$0
@@ -33,6 +35,7 @@ master=Master
 # 同步用户
 repuser=Repuser
 export PATH=DCOM
+cdata_dir="/var/lib/postgresql/data"
 
 logging(){
    echo -e "`date ` : ${*}" >> ${log}
@@ -188,12 +191,21 @@ change_judge(){
     fi
 }
 
+sync_data(){
+    rm -rf ${real_path}
+    docker run --rm -v ${real_path}:${cdata_dir}  ${image} pg_basebackup -h 10.10.7.19 -p 5432 -U pguser  -D ${cdata_dir} ${args} ${slots[${role}]}
+}
 
 reset_pg (){
     docker-compose down
-    data_dir=$(grep "/var/lib/postgresql/data" docker-compose.yaml |awk -F [:-] '{print $2}')
+    data_dir=$(grep "${cdata_dir}" docker-compose.yaml |awk -F [:-] '{print $2}')
+    if [ ${data_dir:1:1} == "/" ];then
+        real_path=${data_dir}
+    else
+        real_path=`pwd`/${data_dir#*/}
+    fi
     mv ${data_dir%/}{,-`date +%F-%H%M%S`-back}
-    logging 备份数据目录 ${data_dir}
+    logging 备份数据目录 ${real_path}
     docker-compose up -d 
     sleep 10
     logging  获取新的master
@@ -204,11 +216,10 @@ reset_pg (){
     else
         args="-X stream -P -v -R -w -C -S"
     fi
-    docker exec postgresql sh -c 'rm -rf /var/lib/postgresql/data/*'
+    docker-compose down
     logging 同步
-
-    docker exec postgresql pg_basebackup -h ${new_master} -p 5432 -U ${repuser}  -D /var/lib/postgresql/data  ${args} ${slots[${role}]}
-    docker-compose restart
+    sync_data
+    docker-compose up -d
 }
 
 main(){
