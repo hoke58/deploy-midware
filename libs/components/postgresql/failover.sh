@@ -193,7 +193,7 @@ change_judge(){
 
 sync_data(){
     rm -rf ${real_path}
-    docker run --rm -v ${real_path}:${cdata_dir}  ${image} pg_basebackup -h 10.10.7.19 -p 5432 -U pguser  -D ${cdata_dir} ${args} ${slots[${role}]}
+    docker run --rm -v ${real_path}:${cdata_dir}  ${image} pg_basebackup -h ${new_master} -p 5432 -U pguser  -D ${cdata_dir} ${args} ${slots[${role}]}
 }
 
 reset_pg (){

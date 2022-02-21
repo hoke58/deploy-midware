@@ -1,5 +1,5 @@
 PACKAGE_NAME = deploy-midware.tgz
-EXCLUDE_LIST = --exclude=Dockerfile --exclude=.gitignore --exclude=.git --exclude=images
+EXCLUDE_LIST = --exclude=Dockerfile --exclude=.gitignore --exclude=.git --exclude=images --exclude=target
 
 MAKE_PATH := $(shell pwd)
 $(eval PARENT_PATH := $(realpath $(MAKE_PATH)/..))
