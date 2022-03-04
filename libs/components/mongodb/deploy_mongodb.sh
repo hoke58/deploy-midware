@@ -32,8 +32,8 @@ DeployMongo() {
     -e "s#\${mongodb1_ip}#$dynamic_mongodb1_ip#g" \
     -e "s#\${mongodb2_ip}#$dynamic_mongodb2_ip#g" \
     -e "s#\${mongodb3_ip}#$dynamic_mongodb3_ip#g" \
-    -e "s#\${MONGO_ADMIN}#$dynamic_mongodb_admin#g" \
-    -e "s#\${MONGO_ADMINPASS}#$dynamic_mongodb_adminpass#g" \
+    -e "s#\${MONGO_INITDB_ROOT_USERNAME}#$dynamic_mongodb_admin#g" \
+    -e "s#\${MONGO_INITDB_ROOT_PASSWORD}#$dynamic_mongodb_adminpass#g" \
     -i ${MW_Yml}
 }    
 
