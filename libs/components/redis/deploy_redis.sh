@@ -1,7 +1,7 @@
 #! /bin/bash
 ACTION=${@:2}
-USER_UID=`id -u`
-GROUP_GID=`id -g`
+USER_UID=`id -u ${dynamic_install_user}`
+GROUP_GID=`id -g ${dynamic_install_user}`
 
 
 check_container() {
