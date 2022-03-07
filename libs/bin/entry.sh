@@ -52,7 +52,7 @@ function MW_getEnvByAliasAndServer() {
   MW_Basename=${MW_Map_Id2Dir[${MW_Alias}${MW_Server}]}
   MW_WkDir=${dynamic_install_userHome}/${MW_Basename}
   # 确定 docker-compose 文件名称,是否待后缀
-  if [ "${MW_Alias}" == "postgresql" -o "${MW_Alias}" == "mongodb" ];then
+  if [ "${MW_Alias}" == "postgresql" -o "${MW_Alias}" == "mongodb" -o "${MW_Alias}" == "rabbitmq" ];then
     MW_TmpltYml="${MW_VersionDir}/docker-compose-${MW_Architecture}.yaml"
   else
     MW_TmpltYml="${MW_VersionDir}/docker-compose.yaml"

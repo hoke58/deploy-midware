@@ -2,8 +2,8 @@
 MONGO_JS=${@:2}
 CONTAINER_MONGO_EXEC="docker exec -u mongodb -i $CONTAINER_ID bash -c"
 current_time=$(date '+%Y%m%d')
-USER_UID=`id -u`
-GROUP_GID=`id -g`
+USER_UID=`id -u ${dynamic_install_user}`
+GROUP_GID=`id -g ${dynamic_install_user}`
 # 要备份的数据库名，多个数据库用空格分开
 databases=(mongo mongocloud cache_database)
 mongo_user=mongouser
@@ -32,15 +32,15 @@ DeployMongo() {
     -e "s#\${mongodb1_ip}#$dynamic_mongodb1_ip#g" \
     -e "s#\${mongodb2_ip}#$dynamic_mongodb2_ip#g" \
     -e "s#\${mongodb3_ip}#$dynamic_mongodb3_ip#g" \
-    -e "s#\${MONGO_ADMIN}#$dynamic_mongodb_admin#g" \
-    -e "s#\${MONGO_ADMINPASS}#$dynamic_mongodb_adminpass#g" \
+    -e "s#\${MONGO_INITDB_ROOT_USERNAME}#$dynamic_mongodb_admin#g" \
+    -e "s#\${MONGO_INITDB_ROOT_PASSWORD}#$dynamic_mongodb_adminpass#g" \
     -i ${MW_Yml}
 }    
 
 CreateUser() {
     if [ $MW_Architecture == "cluster" ]; then
-        $CONTAINER_EXEC "mongo --port 27017 admin --quiet /custom/creatRepl.js"
-        $CONTAINER_EXEC "mongo --port 27017 admin --quiet /custom/creatAdmin.js"
+        $CONTAINER_EXEC "mongo --port ${dynamic_mongodb_port} admin --quiet /custom/creatRepl.js"
+        $CONTAINER_EXEC "mongo --port ${dynamic_mongodb_port} admin --quiet /custom/creatAdmin.js"
     fi
     for db in ${databases[*]}; do
         # \cp -rf ${MW_VersionDir}/jsDefault/joinorg/createUser.js ${MW_WkDir}/mongodb_shell/create${db}User.js
@@ -57,7 +57,7 @@ db.createUser({ user:"$mongo_user",pwd:"$mongo_pw",roles:[{role:"readWrite", db:
 db.getSiblingDB("$db").auth("$mongo_user","$mongo_pw")
 EOF
 
-        $CONTAINER_EXEC "mongo --port 27017 $db --quiet /mongodb_shell/create${db}User.js"
+        $CONTAINER_EXEC "mongo --port ${dynamic_mongodb_port} $db --quiet /mongodb_shell/create${db}User.js"
     done
 }
 
@@ -72,7 +72,7 @@ BakMongo(){
             break
         fi
         colorEcho "===== Backuping $db... ====="
-        $CONTAINER_MONGO_EXEC "/usr/bin/mongodump --port 27017 -d $db --out $CONTAINER_BAKPATH -u $mongo_user -p $mongo_pw"
+        $CONTAINER_MONGO_EXEC "/usr/bin/mongodump --port ${dynamic_mongodb_port} -d $db --out $CONTAINER_BAKPATH -u $mongo_user -p $mongo_pw"
         [[ $? -eq 1 ]] && return 1
         
         nice -n 19 tar zcfv ${HOST_BAKPATH}/${db}.tgz -C ${HOST_BAKPATH} ${db}
@@ -92,7 +92,7 @@ case $1 in
         else
             \cp -rf ${MW_VersionDir}/jsDefault/${MONGO_JS} ${MW_WkDir}/mongodb_shell/
             set -x
-            $CONTAINER_MONGO_EXEC "mongo --port 27017 $db --quiet /mongodb_shell/${MONGO_JS}"
+            $CONTAINER_MONGO_EXEC "mongo --port ${dynamic_mongodb_port} $db --quiet /mongodb_shell/${MONGO_JS}"
             set +x
         fi
     ;;
