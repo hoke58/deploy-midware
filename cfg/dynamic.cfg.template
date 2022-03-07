@@ -9,6 +9,9 @@ export dynamic_mongodb2_ip=10.10.255.21
 export dynamic_mongodb3_ip=10.10.255.24
 export dynamic_mongodb_numOfServers=1    # 值为1为单机模式
 export dynamic_mongodb_port=$global_mongodb_port          #默认27017
+export dynamic_mongodb_admin=$global_mongodb_admin
+export dynamic_mongodb_adminpass=$global_mongodb_adminpass
+
 
 # Postgresql ------------------------------------------------------------
 export dynamic_postgresql_numOfServers=3  # 值为1为单机模式
