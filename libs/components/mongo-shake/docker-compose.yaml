@@ -1,0 +1,26 @@
+version: '3'
+services:
+  mongo-shake:
+    container_name: mongo-shake
+    image: docker_repo/image_name:images_version
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+    - ./collector.conf:/usr/local/mongo-shake/collector.conf
+    ports:
+    - 9110:9100
+    - 9111:9101
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    extra_hosts:
+      # 灾备机房副本集
+      ${dynamic_mongodb1_host}: ${dynamic_mongodb1_ip}
+      ${dynamic_mongodb2_host}: ${dynamic_mongodb2_ip}
+      ${dynamic_mongodb3_host}: ${dynamic_mongodb3_ip}
+      # 生产机房副本集
+      ${dynamic_mongodb1_src_host}: ${dynamic_mongodb1_src_ip}
+      ${dynamic_mongodb2_src_host}: ${dynamic_mongodb2_src_ip}
+      ${dynamic_mongodb3_src_host}: ${dynamic_mongodb3_src_ip}

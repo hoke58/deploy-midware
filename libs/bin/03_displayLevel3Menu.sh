@@ -5,7 +5,7 @@ getConfigedServer(){
    lvl3_svr_id_list[0]="none"
    lvl3_svr_type_list[0]="none"
 
-   local comp="${lvl1_selected_comp}" 
+   local comp="${lvl1_selected_comp/-/_}" 
    local func="${lvl2_selected_function}"
    local prefix="dynamic_${comp}"
    local prefix2="global_${comp}"
@@ -28,6 +28,7 @@ getConfigedServer(){
    else
       lvl3_svr_mode="solo"
    fi
+
   echo "------------------------------------------------------------------------------------------------------------"
   echo "-[#]-[component][type][instance][Ip address:Port][Status][cfg verion][cfg ImageId][Verion][ ImageId ][Matched?]"
   echo "------------------------------------------------------------------------------------------------------------"
@@ -82,7 +83,7 @@ getConfigedServer(){
     if [ "$type" == "local" ];then
        colorEcho $BLUE "-[${i}]-[$comp][${type}][server${i}][${ip}:${port}][${status}][${cfgVersion}][${cfgImageId}][${version}][${imageId}] [$sw]"
     else
-       echo "-[${i}]-[$comp][${type}][server${i}][${ip}:${port}][N/A][${cfgVersion}][${cfgImageId}][Uknown][Uknown] [N/A]"
+       echo "-[${i}]-[$comp][${type}][server${i}][${ip}:${port}][N/A][${cfgVersion}][${cfgImageId}][Unknown][Unknown] [N/A]"
     fi
 
     let i++
@@ -113,7 +114,7 @@ function displayLevel3Menu(){
   echo " "
   echo "---- 7/R：Refresh screen"
   echo "---- 8/N：Return to previous Menu"
-  echo "---- 9/Q：Quilt"
+  echo "---- 9/Q：Quit"
   echo "*********************************************************************************"
   lvl3Select
 }

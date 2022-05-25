@@ -27,8 +27,9 @@ function displayMainMenu(){
   echo "-------- 5/F：Redis Sentinel $(isInstalled redis-sentinel)"
   echo "-------- 6/G：MySQL $(isInstalled mysql)"
   echo "-------- 7/H：Keepalive $(isInstalled keepalive)"
-  echo "-------- 8/I：Display all local docker instances"
-  echo "-------- 9/Q：Quilt"
+  echo "-------- 8/I: mongo shake $(isInstalled mongo-shake)"
+  echo "-------- 9/J：Display all local docker instances"
+  echo "-------- Q：Quit"
   echo "*********************************************************************************"
 
   mainSelect
@@ -76,11 +77,15 @@ mainSelect()
        displayLevel2Menu
     ;;    
     8|I|i)
+       lvl1_selected_comp=mongo-shake
+       displayLevel2Menu
+    ;; 
+    9|J|j)
        lvl1_selected_comp=displayDockers
        displayAllInstances
        mainSelect
     ;;
-    9|Q|q)
+    Q|q)
       colorEcho "byebye!"
       exit 0
     ;;

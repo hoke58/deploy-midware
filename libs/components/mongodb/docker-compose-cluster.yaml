@@ -22,7 +22,7 @@ services:
     ports:
       - ${dynamic_mongodb_port}:${dynamic_mongodb_port}
     healthcheck:
-      test: test $$(echo "rs.status().ok || rs.initiate({_id:'replcluster',members:[{_id:0,host:\"mongodb1:${dynamic_mongodb_port}\"},{_id:1,host:\"mongodb2:${dynamic_mongodb_port}\"},{_id:2,host:\"mongodb3:${dynamic_mongodb_port}\"}]}).ok" | mongo -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --port ${dynamic_mongodb_port} --quiet) -eq 1
+      test: test $$(echo "rs.status().ok || rs.initiate({_id:'replcluster',members:[{_id:0,host:\"${dynamic_mongodb1_host}:${dynamic_mongodb_port}\"},{_id:1,host:\"${dynamic_mongodb2_host}:${dynamic_mongodb_port}\"},{_id:2,host:\"${dynamic_mongodb3_host}:${dynamic_mongodb_port}\"}]}).ok" | mongo -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --port ${dynamic_mongodb_port} --quiet) -eq 1
       interval: 30s
       start_period: 30s
     logging:
@@ -31,6 +31,6 @@ services:
         max-size: "50m"
         max-file: "10"
     extra_hosts:
-      mongodb1: ${mongodb1_ip}
-      mongodb2: ${mongodb2_ip}
-      mongodb3: ${mongodb3_ip}
+      ${dynamic_mongodb1_host}: ${dynamic_mongodb1_ip}
+      ${dynamic_mongodb2_host}: ${dynamic_mongodb2_ip}
+      ${dynamic_mongodb3_host}: ${dynamic_mongodb3_ip}

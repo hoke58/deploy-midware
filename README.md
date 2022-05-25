@@ -1,13 +1,19 @@
 ## Quick start
 
-This shell can be quickly start container of midware, like as mongodb, postgresql, rabbitmq etc.
+This shell can quickly startup/shutdown container(s) of middleware, such as mongodb, postgresql, rabbitmq etc.
+
+1. Generate `cfg/dynamic.cfg` by copying from `cfg/dynamic.cfg.template` for main pool or `cfg/dynamic-backup.cfg.template` if you are deploying middleware to backup pool.
 
 ```sh
+# main pool
 cp cfg/dynamic.cfg.template cfg/dynamic.cfg
-bash deploy-midware.sh
+# backup pool
+cp cfg/dynamic-backup.cfg.template cfg/dynamic.cfg
+# Update environment variables in cfg/dynamic.cfg (see step 2)
+vi cfg/dynamic.cfg
 ```
 
-Setting dynamic environment variables, eg.
+2.  Update dynamic environment variables, especially ip addresses of servers, as below
 
 ```sh
 # workhome ------------------------------------------------------------------
@@ -16,11 +22,11 @@ export dynamic_install_userHome=/home/hoke  #用户根目录路径，即部署�
 # -----------------------------------------------------------------------
 
 # Mongodb ----------------------------------------------------------------
-export dynamic_mongodb1_ip=192.168.8.171
-export dynamic_mongodb2_ip=10.10.255.202
-export dynamic_mongodb3_ip=10.10.255.13
+export dynamic_mongodb1_ip=10.10.1.1
+export dynamic_mongodb2_ip=10.10.1.2
+export dynamic_mongodb3_ip=10.10.1.3
 ```
-Running shell
+3. Run the shell
 
 ```sh
 bash deploy-midware.sh

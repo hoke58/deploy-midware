@@ -18,13 +18,14 @@ MW_Map_Id2Dir=(
  [redis_sentinel3]="redis-sentinel"
  [nginx1]="nginx"
  [nginx2]="nginx"
+ [mongo-shake1]="mongo-shake"
 )
 
 declare -i CALL_SUCC=0
 declare -i CALL_FAIL=1
 
 # 此处变量通过前面菜单选择获得
-MW_Alias=${1?"mongodb/postgresql/rabbitmq/redis/redis-sentinel"}
+MW_Alias=${1?"mongodb/postgresql/rabbitmq/redis/redis-sentinel/mongo-shake"}
 MW_func=${2?"function"}
 MW_Server=${3?"1/2/3"}
 MW_Architecture=${4?"cluster/solo"}
@@ -40,7 +41,7 @@ function MW_getEnvByAliasAndServer() {
 
   # 容器名
   case "${MW_Alias}" in
-  "postgresql"|"nginx"|"redis"|"redis-sentinel")
+  "postgresql"|"nginx"|"redis"|"redis-sentinel"|"mongo-shake")
 	MW_ContainerNm="${MW_Alias}"
 	;;
   *)

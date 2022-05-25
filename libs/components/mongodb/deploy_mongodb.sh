@@ -23,19 +23,22 @@ DeployMongo() {
     mkdir -p ${MW_WkDir}/mongodb_backup ${MW_WkDir}/mongodb_shell
     \cp -rf ${MW_VersionDir}/docker-compose-${MW_Architecture}.yaml ${MW_Yml}
 
-    sed -e "s/\${dynamic_mongodb_port}/$dynamic_mongodb_port/g" \
+    sed -i ${MW_Yml} \
     -e "s/\${global_mongodb_version}/${global_mongodb_version}/g" \
     -e "s#\${DOCKER_REPO}#$global_docker_repo#g" \
     -e "s#\${MW_ContainerNm}#$MW_ContainerNm#g" \
     -e "s#\${USER_UID}#$USER_UID#g" \
     -e "s#\${GROUP_GID}#$GROUP_GID#g" \
-    -e "s#\${mongodb1_ip}#$dynamic_mongodb1_ip#g" \
-    -e "s#\${mongodb2_ip}#$dynamic_mongodb2_ip#g" \
-    -e "s#\${mongodb3_ip}#$dynamic_mongodb3_ip#g" \
+    -e "s/\${dynamic_mongodb_port}/$dynamic_mongodb_port/g" \
+    -e "s#\${dynamic_mongodb1_ip}#$dynamic_mongodb1_ip#g" \
+    -e "s#\${dynamic_mongodb2_ip}#$dynamic_mongodb2_ip#g" \
+    -e "s#\${dynamic_mongodb3_ip}#$dynamic_mongodb3_ip#g" \
+    -e "s#\${dynamic_mongodb1_host}#$dynamic_mongodb1_host#g" \
+    -e "s#\${dynamic_mongodb2_host}#$dynamic_mongodb2_host#g" \
+    -e "s#\${dynamic_mongodb3_host}#$dynamic_mongodb3_host#g" \
     -e "s#\${MONGO_INITDB_ROOT_USERNAME}#$dynamic_mongodb_admin#g" \
-    -e "s#\${MONGO_INITDB_ROOT_PASSWORD}#$dynamic_mongodb_adminpass#g" \
-    -i ${MW_Yml}
-}    
+    -e "s#\${MONGO_INITDB_ROOT_PASSWORD}#$dynamic_mongodb_adminpass#g"
+}
 
 CreateUser() {
     if [ $MW_Architecture == "cluster" ]; then

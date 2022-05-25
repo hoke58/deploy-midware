@@ -60,19 +60,19 @@ getParmByName(){
   #     value=`eval echo \${"${parmName}"}`
  
   if [ -z "${parmName}" ];then
-     echo "ERROR:${parmName} not configed!"
+     echo "ERROR:${parmName} not exit!"
      exit 1
   fi
   if [ -z "$value" ];then
-     echo "ERROR:${parmName}=${value} not updated!"
+     echo "ERROR:${parmName}=${value} not configured!"
      exit 1
   fi
   if [ "$value" == "xxx" ];then
-     echo "ERROR:${parmName}=${value} not updated!"
+     echo "ERROR:${parmName}=${value} not configured!"
      exit 1
   fi
   if [ "$value" == "x.x.x.x" ];then
-     echo "ERROR:${parmName}=${value} not updated!"
+     echo "ERROR:${parmName}=${value} not configured!"
      exit 1
   fi
   echo $value
@@ -84,7 +84,7 @@ checkIp(){
    do
      if [ $var -ge 1 -a $var -le 255 ]
      then
-        echo "wrong ip format:$ip"
+        echo "INVALID ip format: $ip"
         continue
      else
         exit 1
@@ -105,9 +105,9 @@ getServerStatus(){
  else
    name="$comp"
  fi
- value=`docker ps -a -f name="${name}" --format "{{.Status}}"`
+ value=`docker ps -a -f name="^/${name}$" --format "{{.Status}}"`
  if [ -z "${value}" ];then
-    echo "Uknown"
+    echo "no container"
  else
     echo "$value"
  fi
@@ -121,11 +121,11 @@ getServerImageVersion(){
  else
    name="$comp"
  fi
- value=`docker ps -a -f name="${name}" --format "{{.Image}}" |awk -F ':' '{print $2}'`
+ value=`docker ps -a -f name="^/${name}$" --format "{{.Image}}" |awk -F ':' '{print $2}'`
  if [ -z "${value}" ];then
-    echo "Uknown"
+   echo "Unknown"
  else
-    echo "$value"
+   echo "$value"
  fi
 }
 
@@ -137,16 +137,16 @@ getServerImageId(){
  else
    name="$comp"
  fi
- local value=`docker ps -a -f name="${name}" --format "{{.Image}}"`
+ local value=`docker ps -a -f name="^/${name}$" --format "{{.Image}}"`
  if [ -z "${value}" ];then
-    echo "Uknown"
+   echo "Unknown"
  else
-    id=`docker images -q "$value"`
-    if [ -z "${id}" ];then
-       echo "Uknown"
-    else
-      echo "$id"
-    fi
+   id=`docker images -q "$value"`
+   if [ -z "${id}" ];then
+      echo "Unknown"
+   else
+     echo "$id"
+   fi
  fi
 }
 
