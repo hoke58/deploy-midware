@@ -22,7 +22,7 @@ JoinCluster() {
 }
 
 check_messages(){
-if [ `docker exec -i $CONTAINER_ID rabbitmqctl list_queues messages | sed -n '/[1-9]/p' | wc -l` -ne 0 ]; then
+if [ `docker exec -i $CONTAINER_ID rabbitmqctl list_queues messages | sed -r -n '/^[1-9]/p' | wc -l` -ne 0 ]; then
     echo "WARN: MQ 队列中有拥塞消息，请人工介入"
     echo
     exit 1
