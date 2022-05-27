@@ -95,7 +95,7 @@ case $1 in
         else
             \cp -rf ${MW_VersionDir}/jsDefault/${MONGO_JS} ${MW_WkDir}/mongodb_shell/
             set -x
-            $CONTAINER_MONGO_EXEC "mongo --port ${dynamic_mongodb_port} $db --quiet /mongodb_shell/${MONGO_JS}"
+            $CONTAINER_MONGO_EXEC "mongo mongodb://${dynamic_mongodb1_host}:${dynamic_mongodb_port},${dynamic_mongodb2_host}:${dynamic_mongodb_port},${dynamic_mongodb3_host}:${dynamic_mongodb_port}/admin?replicaSet=replcluster -u ${global_mongodb_admin} -p ${global_mongodb_adminpass} --quiet /mongodb_shell/${MONGO_JS}"
             set +x
         fi
     ;;
