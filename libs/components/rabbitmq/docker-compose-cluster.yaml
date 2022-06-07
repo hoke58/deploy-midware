@@ -1,4 +1,4 @@
-version: "3"                                                                                                                                       
+version: "3"
 services: 
   rabbitmq:
     image: ${DOCKER_REPO}/rabbitmq:${global_rabbitmq_version}
