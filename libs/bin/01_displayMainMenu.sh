@@ -27,7 +27,7 @@ function displayMainMenu(){
   echo "-------- 5/F：Redis Sentinel $(isInstalled redis-sentinel)"
   echo "-------- 6/G：MySQL $(isInstalled mysql)"
   echo "-------- 7/H：Keepalive $(isInstalled keepalive)"
-  echo "-------- 8/I: mongo shake $(isInstalled mongo-shake)"
+  echo "-------- 8/I: Mongo shake $(isInstalled mongo-shake)"
   echo "-------- 9/J：Display all local docker instances"
   echo "-------- Q：Quit"
   echo "*********************************************************************************"
@@ -39,7 +39,7 @@ mainSelect()
 {
   while true; do
     read -p "Please select Option:" option
-    flag=$(echo $option|egrep "[0-9]|[A-Ha-h,Qq]" |wc -l)
+    flag=$(echo $option|egrep "[0-9]|[A-Ka-k,Qq]" |wc -l)
     [ $flag -eq 1 ] && break
   done
   
@@ -77,7 +77,7 @@ mainSelect()
        displayLevel2Menu
     ;;    
     8|I|i)
-       lvl1_selected_comp=mongo-shake
+       lvl1_selected_comp="mongo-shake"
        displayLevel2Menu
     ;; 
     9|J|j)

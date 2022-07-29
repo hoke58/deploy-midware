@@ -37,7 +37,8 @@ export dynamic_postgresql_port=$global_postgresql_port             #默认5432
 export dynamic_postgresql1_ip=$dynamic_mongodb1_ip  #默认同mongodb1机器部署 
 export dynamic_postgresql2_ip=$dynamic_mongodb2_ip  #默认同mongodb2机器部署 
 export dynamic_postgresql3_ip=$dynamic_mongodb3_ip  #默认同mongodb3机器部署
-export dynamic_postgres_replication_user=${global_postgresql_user}      #默认同步用户
+export dynamic_postgres_password=${global_postgresql_pass}  #postgres 超管密码
+export dynamic_postgres_replication_user=replicator      #默认同步用户
 export dynamic_postgres_replication_password=${global_postgresql_pass}  #默认同步用户密码
 
 # RabbitMQ --------------------------------------------------------------
@@ -64,5 +65,3 @@ export dynamic_nginx2_ip=10.10.255.202
 export dynamic_nginx_numOfServers=1    # 值为1为单机模式
 export dynamic_nginx_port=$global_nginx_port  # nginx web 端口，默认 8080
 export dynamic_nginx_www=$dynamic_install_userHome/nginx/www  # 静态资源路径
-
-# Redis -----------------------------------------------------------------------

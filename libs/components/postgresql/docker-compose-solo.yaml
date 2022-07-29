@@ -2,28 +2,28 @@ version: '3'
 
 services:
 
-  db:
-    container_name: ${MW_ContainerNm}
+  postgres:
     image: ${DOCKER_REPO}/postgresql:${global_postgresql_version}
+    container_name: postgresql
+    hostname: postgresql
     restart: always
+    shm_size: 256M
     environment:
-      - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=postgres!@#456
-      - HOST_UID=USER_UID
-#      - POSTGRES_DB=platform
-
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      RUNNING_MODE: postgresql_solo
+      HOST_UID: USER_UID
+      HOST_GID: GROUP_GID
     logging:
       driver: "json-file"
       options:
         max-size: "50m"
-
     healthcheck:
       test: "pg_isready -h localhost -p 5432 -q -U postgres" 
       interval: 30s
       start_period: 60s
-
+    command: /entrypoint.sh
     volumes:
-      - ./data/postgresql:/var/lib/postgresql/data
+      - ./postgresql_data:/var/lib/postgresql/data
       - ./sql:/opt
     ports:
       - 5432:5432

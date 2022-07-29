@@ -1,14 +1,13 @@
 #!/bin/bash
-
 declare -A MW_Map_Id2Dir
 # 通过 id 映射目录名
 MW_Map_Id2Dir=(
  [mongodb1]="mongodb1" 
  [mongodb2]="mongodb2"
  [mongodb3]="mongodb3"
- [postgresql1]="postgresql"
- [postgresql2]="postgresql"
- [postgresql3]="postgresql"
+ [postgresql1]="postgresql1"
+ [postgresql2]="postgresql2"
+ [postgresql3]="postgresql_monitor"
  [rabbitmq1]="rabbitmq1"
  [rabbitmq2]="rabbitmq2"
  [redis1]="redis"
@@ -19,17 +18,17 @@ MW_Map_Id2Dir=(
  [nginx1]="nginx"
  [nginx2]="nginx"
  [mongo-shake1]="mongo-shake"
+ [pg_failover_monitor1]="pg_failover_monitor"
 )
 
 declare -i CALL_SUCC=0
 declare -i CALL_FAIL=1
 
 # 此处变量通过前面菜单选择获得
-MW_Alias=${1?"mongodb/postgresql/rabbitmq/redis/redis-sentinel/mongo-shake"}
+MW_Alias=${1?"mongodb/postgresql/rabbitmq/redis/redis-sentinel/mongo-shake/pg_failover_monitor"}
 MW_func=${2?"function"}
 MW_Server=${3?"1/2/3"}
 MW_Architecture=${4?"cluster/solo"}
-MW_cmd=${@:5}
 
 # 获取环境参数
 function MW_getEnvByAliasAndServer() {
@@ -37,17 +36,7 @@ function MW_getEnvByAliasAndServer() {
   # COM_Time=$(date '+%H%M%s')
   COM_Time=$(date '+%H%M')
   # 组件目录
-  MW_VersionDir=${mainShellPath}/libs/components/${MW_Alias/_/-}
-
-  # 容器名
-  case "${MW_Alias}" in
-  "postgresql"|"nginx"|"redis"|"redis-sentinel"|"mongo-shake")
-	MW_ContainerNm="${MW_Alias}"
-	;;
-  *)
-	MW_ContainerNm="${MW_Alias}${MW_Server}"
-	;;
-  esac
+  MW_VersionDir=${mainShellPath}/libs/components/${MW_Alias}
 
   # 获取部署名称及部署目录
   MW_Basename=${MW_Map_Id2Dir[${MW_Alias}${MW_Server}]}
@@ -62,10 +51,22 @@ function MW_getEnvByAliasAndServer() {
   # 部署资源确定
   MW_Yml=${MW_WkDir}/docker-compose.yaml
   MW_ImgDir=${mainShellPath}/images
-  eval MW_ImgVersion="\$global_${MW_Alias}_version"
+  # eval MW_ImgVersion="\$global_${MW_Alias}_version"
+  MW_ImgVersion=$cfgVersion
   MW_ImgFile=${MW_Alias}"-"${MW_ImgVersion}".tar"
-  eval MW_ImgID="\$global_${MW_Alias}_imageId"
+  # eval MW_ImgID="\$global_${MW_Alias}_imageId"
+  eval MW_ImgID=$cfgImageId
   
+  # 容器名
+  case "${MW_Alias}" in
+  "nginx"|"redis"|"redis-sentinel"|"mongo-shake"|"pg_failover_monitor")
+	MW_ContainerNm="${MW_Alias}"
+	;;
+  *)
+	MW_ContainerNm="${MW_Basename}"
+	;;
+  esac
+
   # 获取容器ID
   CONTAINER_ID=`docker ps -aq -f name=$MW_ContainerNm`
   CONTAINER_EXEC="docker exec -i $CONTAINER_ID bash -c"
@@ -121,7 +122,7 @@ function MW_LoadImg() {
 
         else
             docker load -i ${MW_ImgDir}/${MW_ImgFile}
-            [[ $? -ne 0 ]] && MW_log "ERROR" "$FUNCTION load image failed " && return $CALL_FAL || return $CALL_SUCC
+            [[ $? -ne 0 ]] && MW_log "ERROR" "$FUNCTION load image failed " && return $CALL_FAIL || return $CALL_SUCC
         fi
     fi
 }
@@ -142,7 +143,7 @@ function Execute_Command(){
   # [[ ! -f ${file} ]] && MW_log "ERROR" "$FUNCNAME file  not exist ${file}, execute command failed" && return $CALL_FAIL
   # bash $file $parm
 
-  . $MW_VersionDir/deploy_${MW_Alias}.sh 2 $MW_cmd
+  . $MW_VersionDir/deploy_${MW_Alias}.sh 2
   [[ $? -eq $CALL_FAIL ]] && MW_log "ERROR" "${MW_Alias} $FUNCNAME failed" && return $CALL_FAIL
 }
 
@@ -176,7 +177,7 @@ function Down_Container() {
   [[ ! -f ${MW_Yml} ]] && MW_log "ERROR" "${MW_Yml} not found" && return $CALL_FAIL
   if [ ${MW_Alias} == "rabbitmq" ]; then
     $CONTAINER_EXEC "chown -R $USER_UID:$GROUP_GID /var/lib/rabbitmq"
-  fi  
+  fi
   docker-compose -f $MW_Yml down
   if [ $? -eq $CALL_FAIL ]; then
     MW_log "ERROR" "$FUNCNAME shutdown ${MW_Alias} failed " && return $CALL_FAIL
@@ -202,15 +203,13 @@ function Up_Container() {
     [[ $? -eq $CALL_FAIL ]] && return $CALL_FAIL
   fi
   
+  # 加载镜像并启动
+  MW_LoadImg
   # 创建部署目录及生成相关文件
   [[ ! -d $MW_WkDir ]] && mkdir -p ${MW_WkDir}
   . $MW_VersionDir/deploy_${MW_Alias}.sh 1
-  [[ $? -eq $CALL_FAIL ]] && MW_log "ERROR" "$FUNCNAME failed" && return $CALL_FAIL
-  
-  # 加载镜像并启动
-  MW_LoadImg
-  [[ $? -eq $CALL_FAIL ]] && return $CALL_FAIL
-  docker-compose -f $MW_Yml up -d
+
+  docker-compose -f $MW_Yml up -d --force-recreate
   if [ $? -eq $CALL_FAIL ]; then
     MW_log "ERROR" "$FUNCNAME startup ${MW_Alias} failed " && return $CALL_FAIL
   else
@@ -220,10 +219,10 @@ function Up_Container() {
   ## add judge
   [[ ${MW_Alias} =~ "rabbitmq" ]] && . $MW_VersionDir/deploy_${MW_Alias}.sh 3
   
-  ## 判断是否集群
-  if [[ ${MW_Alias} =~ "postgres" ]]; then
-	. $MW_VersionDir/deploy_${MW_Alias}.sh 4
-  fi 
+  # ## 判断是否集群
+  # if [[ ${MW_Alias} =~ "postgres" ]]; then
+	# . $MW_VersionDir/deploy_${MW_Alias}.sh 4
+  # fi 
 }
 
 function Backup() {
@@ -234,7 +233,7 @@ function Backup() {
   else  
     [[ ! -d ${MW_BackupDir} ]] && mkdir -p ${MW_BackupDir}
     tar czvf $MW_BackupFile --exclude=logs --exclude=${MW_Alias}_backup -C ${dynamic_install_userHome} $MW_Basename
-    MW_log "INFO" "$FUNCNAME Backup ${MW_Alias}${MW_Server} SUCC" 
+    MW_log "INFO" "$FUNCNAME Backup ${MW_Alias}${MW_Server} to ${dynamic_install_userHome} SUCC" 
   fi
 }
 

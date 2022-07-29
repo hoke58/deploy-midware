@@ -27,13 +27,9 @@ function displayLevel2Menu(){
 }
 
 lvl2Select(){
- 
-   lvl2_selected_function=none  
-   lvl2_selected_cmd=none
-
    while true; do
       read  -p "Please select Option:" option
-      flag=$(echo $option|egrep "[0-9]|[A-Ha-h,Qq]" |wc -l)
+      flag=$(echo $option|egrep "[0-9]|[A-Ea-e,Nn,Qq]" |wc -l)
       [ $flag -eq 1 ] && break
    done
   
@@ -52,73 +48,7 @@ lvl2Select(){
    ;;
    4|D|d)
       lvl2_selected_function=Execute_Command
-      if [ "${lvl1_selected_comp}" == "nginx" ]; then
-         local nginx_command=(vhost proxy)
-         while true; do
-            echo -e "select command:"
-            for ((i=1;i<=${#nginx_command[@]};i++ )); do
-               hint="${nginx_command[$i-1]}"
-               echo -e "${i}) ${hint}"
-            done
-            read -p "Select command（default: ${nginx_command[0]}）:" input_nu
-            [ -z "$input_nu" ] && input_nu=1
-            expr ${input_nu} + 1 &>/dev/null
-            if [ $? -ne 0 ]; then
-               colorEcho $RED "ERROR: invalid input"
-               continue
-            fi
-            if [[ "$input_nu" -lt 1 || "$input_nu" -gt ${#nginx_command[@]} ]]; then
-               colorEcho ${RED} "Error: invalid input， number must be between 1 to ${#nginx_command[@]}"
-               continue
-            fi
-            EXCUTE_COMMAND=${nginx_command[$input_nu-1]}
-            break
-         done
-      elif [ "${lvl1_selected_comp}" == "rabbitmq" ]; then
-         local command_list=(status setha exchange)
-         while true; do
-            echo -e "select command:"
-            for ((i=1;i<=${#command_list[@]};i++ )); do
-               hint="${command_list[$i-1]}"
-               echo -e "${i}) ${hint}"
-            done
-            read -p "Select command（default: ${command_list[0]}）:" input_nu
-            [ -z "$input_nu" ] && input_nu=1
-            expr ${input_nu} + 1 &>/dev/null
-            if [ $? -ne 0 ]; then
-               colorEcho $RED "ERROR: invalid input"
-               continue
-            fi
-            if [[ "$input_nu" -lt 1 || "$input_nu" -gt ${#command_list[@]} ]]; then
-               colorEcho ${RED} "Error: invalid input， number must be between 1 to ${#command_list[@]}"
-               continue
-            fi
-            EXCUTE_COMMAND=${command_list[$input_nu-1]}
-            break
-         done
-
-      fi 
-
-      if [ "${lvl1_selected_comp}" == "mongodb" -o "${lvl1_selected_comp}" == "postgresql" ]; then
-         colorEcho $YELLOW "Directly press enter to initialize, if first installation"
-         colorEcho $YELLOW "Or input script filename to invoke script, one by one"
-         read  -p "Press Enter or Input File name:" cmd1 
-         flag=$(echo "$cmd1" |grep -E "^$|*\.sql$|*\.sh|*\.bash$|*\.js$" |wc -l)
-         if [ $flag -eq 1 ];then
-            if [ -z $cmd1 ]; then
-               lvl2_selected_cmd="none"
-            else
-               lvl2_selected_cmd="$cmd1"
-            fi
-            displayLevel3Menu
-         fi
-      elif [ "${lvl1_selected_comp}" == "nginx" -o "${lvl1_selected_comp}" == "rabbitmq" ]; then
-         lvl2_selected_cmd="$EXCUTE_COMMAND"
-         displayLevel3Menu
-      else
-         colorEcho "function currently not supported!!"
-         lvl2Select
-      fi
+      displayLevel3Menu
    ;;
    5|E|e)
       lvl2_selected_function=Clean

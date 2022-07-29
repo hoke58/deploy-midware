@@ -2,31 +2,32 @@ version: '3'
 
 services:
 
-  db:
-    container_name: ${MW_ContainerNm}
+  postgres:
     image: ${DOCKER_REPO}/postgresql:${global_postgresql_version}
+    container_name: ${MW_ContainerNm}
     restart: always
+    hostname: ${MW_ContainerNm}
+    shm_size: 256M
     environment:
-      - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=postgres!@#456
-      - HOST_UID=USER_UID
-#      - POSTGRES_DB=platform
-
+      RUNNING_MODE: ${running_mode}
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      HOST_UID: USER_UID
+      HOST_GID: GROUP_GID
     volumes:
-      - ./data/postgresql:/var/lib/postgresql/data
+      - ./${MW_ContainerNm}_data:/var/lib/postgresql
       - ./sql:/opt
+    command: /entrypoint.sh  
     logging:
       driver: "json-file"
       options:
         max-size: "50m"
-
     healthcheck:
-      test: test -f /var/lib/postgresql/data/postmaster.pid -a $$(psql -U postgres -c "select active from pg_replication_slots;"|sed -n '/f/p' |wc -l) -eq 0
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
       interval: 30s
       start_period: 60s
     ports:
       - 5432:5432
     extra_hosts:
-      db1: ${postgresql1_ip} #postgresql的 primary  节点IP，按实际修改
-      db2: ${postgresql2_ip} #postgresql的 standby1 节点IP，按实际修改
-      db3: ${postgresql3_ip} #postgresql的 standby2 节点IP，按实际修改
+      postgresql1: ${postgresql1_ip} #postgresql的 primary  节点IP，按实际修改
+      postgresql2: ${postgresql2_ip} #postgresql的 standby 节点IP，按实际修改
+      postgresql_monitor: ${postgresql3_ip} #postgresql的 monitor 节点IP，按实际修改

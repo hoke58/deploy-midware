@@ -1,8 +1,5 @@
 #!/bin/bash
 
-ACTION=${@:2}
-USER_UID=`id -u`
-GROUP_GID=`id -g`
 # Color
 red='\033[0;31m'
 green='\033[0;32m'
@@ -57,6 +54,30 @@ check_ip() {
         colorEcho $RED "IP format error!"
         return 1
     fi
+}
+
+which_action() {
+    local nginx_command=(vhost proxy)
+    while true; do
+    echo -e "select command:"
+    for ((i=1;i<=${#nginx_command[@]};i++ )); do
+        hint="${nginx_command[$i-1]}"
+        echo -e "${i}) ${hint}"
+    done
+    read -p "Select command（default: ${nginx_command[0]}）:" input_nu
+    [ -z "$input_nu" ] && input_nu=1
+    expr ${input_nu} + 1 &>/dev/null
+    if [ $? -ne 0 ]; then
+        colorEcho $RED "ERROR: invalid input"
+        continue
+    fi
+    if [[ "$input_nu" -lt 1 || "$input_nu" -gt ${#nginx_command[@]} ]]; then
+        colorEcho ${RED} "Error: invalid input， number must be between 1 to ${#nginx_command[@]}"
+        continue
+    fi
+    ACTION=${nginx_command[$input_nu-1]}
+    break
+    done
 }
 
 pre_install(){
@@ -342,6 +363,7 @@ case $1 in
         DeployNginx
     ;;
     2)
+        which_action
         if [ $ACTION == "vhost" ]; then
             pre_install
             display

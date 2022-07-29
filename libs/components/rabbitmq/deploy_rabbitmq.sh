@@ -1,7 +1,4 @@
 #! /bin/bash
-ACTION=${@:2}
-USER_UID=`id -u`
-GROUP_GID=`id -g`
 CONTAINER_ID=`docker ps -aq -f name=rabbit`
 CONTAINER_EXEC="docker exec -i $CONTAINER_ID bash -c"
 
@@ -117,11 +114,36 @@ exchange() {
     docker exec $CONTAINER_ID rabbitmqadmin -u loc -p loc list bindings
 }
 
+which_action() {
+    local command_list=(status setha exchange)
+    while true; do
+        echo -e "select command:"
+        for ((i=1;i<=${#command_list[@]};i++ )); do
+            hint="${command_list[$i-1]}"
+            echo -e "${i}) ${hint}"
+        done
+        read -p "Select command（default: ${command_list[0]}）:" input_nu
+        [ -z "$input_nu" ] && input_nu=1
+        expr ${input_nu} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            colorEcho $RED "ERROR: invalid input"
+            continue
+        fi
+        if [[ "$input_nu" -lt 1 || "$input_nu" -gt ${#command_list[@]} ]]; then
+            colorEcho ${RED} "Error: invalid input， number must be between 1 to ${#command_list[@]}"
+            continue
+        fi
+        ACTION=${command_list[$input_nu-1]}
+        break
+    done
+}
+
 case $1 in
     1)
         DeployRabbitmq
     ;;
     2)
+        which_action
         if [ $ACTION == "status" ]; then
             check_container
             CheckStatus

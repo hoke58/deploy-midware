@@ -1,14 +1,13 @@
 #!/bin/bash
 getConfigedServer(){
 
-   lvl3_svr_mode="cluster"
    lvl3_svr_id_list[0]="none"
    lvl3_svr_type_list[0]="none"
 
    local comp="${lvl1_selected_comp/-/_}" 
    local func="${lvl2_selected_function}"
-   local prefix="dynamic_${comp}"
-   local prefix2="global_${comp}"
+   local prefix="dynamic_${lvl1_selected_comp}"
+   local prefix2="global_${lvl1_selected_comp}"
 
 #   local parmName="${prefix}_mode";
 #   value=$(getParmByName "${parmName}")
@@ -16,7 +15,7 @@ getConfigedServer(){
 #      lvl3_svr_mode=$value
 #   fi
 
-   local  parmName="${prefix}_numOfServers";
+   local parmName="${prefix}_numOfServers"
    lvl3_svr_numOfServers=$(getParmByName "${parmName}")
    verifyResult $? "getParmByName failed!${lvl3_svr_numOfServers}"
    if [ -z "$lvl3_svr_numOfServers" ];then
@@ -32,35 +31,34 @@ getConfigedServer(){
   echo "------------------------------------------------------------------------------------------------------------"
   echo "-[#]-[component][type][instance][Ip address:Port][Status][cfg verion][cfg ImageId][Verion][ ImageId ][Matched?]"
   echo "------------------------------------------------------------------------------------------------------------"
- 
   let  i=1
   while ((i<=$lvl3_svr_numOfServers))
   do
-    parmName="${prefix}${i}_ip"
-    ip=$(getParmByName "${parmName}")
-    verifyResult $? "getParmByName failed!${ip}"
+      parmName="${prefix}${i}_ip"
+      ip=$(getParmByName "${parmName}")
+      verifyResult $? "getParmByName failed!${ip}"
 
-    parmName="${prefix}_port"
-    port=$(getParmByName "${parmName}")
-    verifyResult $? "getParmByName failed!${port}"
+      parmName="${prefix}_port"
+      port=$(getParmByName "${parmName}")
+      verifyResult $? "getParmByName failed!${port}"
+   
+      parmName="${prefix2}_version"
+      export cfgVersion=$(getParmByName "${parmName}")
+      verifyResult $? "getParmByName failed!${cfgVersion}"
 
-    parmName="${prefix2}_version"
-    cfgVersion=$(getParmByName "${parmName}")
-    verifyResult $? "getParmByName failed!${cfgVersion}"
+      parmName="${prefix2}_imageId"
+      export cfgImageId=$(getParmByName "${parmName}")
+      verifyResult $? "getParmByName failed!${cfgImageId}"
+      
+      local status=""
+         if [ "${func}" == "install" ];then
+            status="New"
+         else
+            status=$(getServerStatus "$lvl1_selected_comp" $i)
+         fi
 
-    parmName="${prefix2}_imageId"
-    cfgImageId=$(getParmByName "${parmName}")
-    verifyResult $? "getParmByName failed!${cfgImageId}"
-     
-    local status=""
-    if [ "${func}" == "install" ];then
-       status="New"
-    else
-       status=$(getServerStatus "$comp" $i)
-    fi
-
-    version=$(getServerImageVersion "$comp" $i)
-    imageId=$(getServerImageId "$comp" $i)
+    version=$(getServerImageVersion "$lvl1_selected_comp" $i)
+    imageId=$(getServerImageId "$lvl1_selected_comp" $i)
  
     local type="";
     flag=`echo "$(getLocalIps)" |grep "$ip" |wc -l` 
@@ -81,9 +79,9 @@ getConfigedServer(){
     lvl3_svr_type_list[i]="$type"
 
     if [ "$type" == "local" ];then
-       colorEcho $BLUE "-[${i}]-[$comp][${type}][server${i}][${ip}:${port}][${status}][${cfgVersion}][${cfgImageId}][${version}][${imageId}] [$sw]"
+       colorEcho $BLUE "-[${i}]-[$lvl1_selected_comp][${type}][server${i}][${ip}:${port}][${status}][${cfgVersion}][${cfgImageId}][${version}][${imageId}] [$sw]"
     else
-       echo "-[${i}]-[$comp][${type}][server${i}][${ip}:${port}][N/A][${cfgVersion}][${cfgImageId}][Unknown][Unknown] [N/A]"
+       echo "-[${i}]-[$lvl1_selected_comp][${type}][server${i}][${ip}:${port}][N/A][${cfgVersion}][${cfgImageId}][Unknown][Unknown] [N/A]"
     fi
 
     let i++
@@ -108,7 +106,7 @@ function displayLevel3Menu(){
   
   echo ""
   echo "************************ Level3 Server Menu *************************************"
-  echo "Component: $(colorEcho $BLUE ${lvl1_selected_comp})  Function: $(colorEcho $BLUE ${lvl2_selected_function}) Command: $(colorEcho $BLUE ${lvl2_selected_cmd})"
+  echo "Component: $(colorEcho $BLUE ${lvl1_selected_comp})  Function: $(colorEcho $BLUE ${lvl2_selected_function})"
   echo ""
   getConfigedServer
   echo " "
@@ -135,10 +133,8 @@ lvl3Select(){
           lvl3Select
        else
           lvl3_selected_server=$option
-          invokeFunction "${lvl1_selected_comp}" "${lvl2_selected_function}" "${lvl3_selected_server}" "${lvl3_svr_mode}" "${lvl2_selected_cmd}" 
+          invokeFunction "${lvl1_selected_comp}" "${lvl2_selected_function}" "${lvl3_selected_server}" "${lvl3_svr_mode}" 
        fi
-      # lvl3_selected_server=$option
-      # invokeFunction "${lvl1_selected_comp}" "${lvl2_selected_function}" "${lvl3_selected_server}" "${lvl3_svr_mode}" "${lvl2_selected_cmd}" 
     ;;
     7|r)
       displayLevel3Menu  

@@ -7,8 +7,8 @@ export GREEN="32m"    # Success message
 export YELLOW="33m"   # Warning message
 export BLUE="36m"     # Info message
 
-export USER_UID=`id -u`
-export GROUP_GID=`id -g`
+export USER_UID=`id -u $dynamic_install_user`
+export GROUP_GID=`id -g $dynamic_install_user`
 
 verifyResult () {
 	if [ $1 -ne 0 ] ; then
@@ -105,7 +105,7 @@ getServerStatus(){
  else
    name="$comp"
  fi
- value=`docker ps -a -f name="^/${name}$" --format "{{.Status}}"`
+ value=`docker ps -a -f name="^/${name}" --format "{{.Status}}"`
  if [ -z "${value}" ];then
     echo "no container"
  else
@@ -121,7 +121,7 @@ getServerImageVersion(){
  else
    name="$comp"
  fi
- value=`docker ps -a -f name="^/${name}$" --format "{{.Image}}" |awk -F ':' '{print $2}'`
+ value=`docker ps -a -f name="${name}" --format "{{.Image}}" |awk -F ':' '{print $2}'`
  if [ -z "${value}" ];then
    echo "Unknown"
  else
@@ -137,7 +137,7 @@ getServerImageId(){
  else
    name="$comp"
  fi
- local value=`docker ps -a -f name="^/${name}$" --format "{{.Image}}"`
+ local value=`docker ps -a -f name="${name}" --format "{{.Image}}"`
  if [ -z "${value}" ];then
    echo "Unknown"
  else
@@ -154,55 +154,6 @@ getLocalIps(){
   #local ips=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`	
   local ips=`ip a s |grep -Eo "inet (.*)/" |sed -r "s/(inet )([0-9.]{6,})(.*)/\2/"`	
   echo "$ips"
-}
-
-
-postgreValidate(){
-  cmdParms=${1?}
-  local cmdCnt=`echo $cmdParms|awk '{print NF}'`
-  local parentPath=${cmdParms%%/*}
-  local fileType=${cmdParms##*.}
-  fileType=`echo $fileType|tr [:upper:] [:lower:]`
-  if [ $cmdCnt -eq 1 ];then
-    if [ $parentPath == "platSql" -o $parentPath == "userSql" ];then
-      if [ $fileType == "sql" ];then
-        echo "PSQL"
-        return 0
-      fi
-    fi
-  fi
-  #dbInit_boc  platShell  platSql  userShell  userSql
-}
-
-getSQLFullPath(){
-  local func=$3
-  local middle=""
-  local path=""
-  if [ "$unit" == "web" -o "$unit" == "app" -o $unit == "middleware" -o $unit == "fabric" ];then
-     middle="${unit}_"
-  fi
-  local name="${autoshell_prefix}${middle}${func}.sh"
-  
-  echo "${path}/${name}"
-
-}
-
-invokePSQL() {
-  local unit=${1?}
-  local comp=${2?}
-  local func=${3?"function is required"}
-  local server=$4
-  local cmdPath=${5?}
-  local path="$(getUserHome)/libs/components/${unit}/${comp}"
-  local subpath=${cmdPath%/*}
-  local fileName=${cmdPath##*/}
-  local fullFilePath=$path/$subpath/${fileName}
-  local pgDockerShellPath=/opt/scripts/${subpath}
-  echo "###################### invoke PSQL start #############################"
-  docker exec postgresql mkdir -p ${pgDockerShellPath}
-  docker cp ${fullFilePath} postgresql:${pgDockerShellPath}
-  docker exec postgresql psql hbcc postgres -f ${pgDockerShellPath}/${fileName}
-  echo "###################### invoke PSQL end #############################"
 }
 
 invokeFunction(){
