@@ -18,11 +18,12 @@ verifyResult () {
 }
 
 colorEcho(){
+  TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
   if [ $# -eq 1 ]; then
-    echo "${@}"
+    echo "--$TIMESTAMP-- ${@}"
   else
     COLOR=$1
-    echo -e "\033[${COLOR}${@:2}\033[0m"
+    echo -e "--$TIMESTAMP-- \033[${COLOR}${@:2}\033[0m"
   fi
 }
 

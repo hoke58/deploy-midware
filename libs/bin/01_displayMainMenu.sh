@@ -4,7 +4,7 @@ source ${lvl1ShellPath}/02_displayLevel2Menu.sh
 
 isInstalled(){
   local containerName=$1
-  local flag=`docker ps -a --format "table {{.Names}}" |grep $containerName|wc -l`
+  local flag=`docker ps -a --format "table {{.Names}}" 2>/dev/null|grep $containerName|wc -l`
   [ $flag -eq 1 ] && colorEcho $GREEN "[installed]"
 }
 
@@ -28,7 +28,8 @@ function displayMainMenu(){
   echo "-------- 6/G：MySQL $(isInstalled mysql)"
   echo "-------- 7/H：Keepalive $(isInstalled keepalive)"
   echo "-------- 8/I: Mongo shake $(isInstalled mongo-shake)"
-  echo "-------- 9/J：Display all local docker instances"
+  echo "-------- 9/J：Install Docker-ce and docker-compose"
+  echo "-------- 10/K：Display all local docker instances"
   echo "-------- Q：Quit"
   echo "*********************************************************************************"
 
@@ -39,7 +40,7 @@ mainSelect()
 {
   while true; do
     read -p "Please select Option:" option
-    flag=$(echo $option|egrep "[0-9]|[A-Ka-k,Qq]" |wc -l)
+    flag=$(echo $option|egrep "[0-9]|1[0-1]|[A-Ka-k,Qq]" |wc -l)
     [ $flag -eq 1 ] && break
   done
   
@@ -81,6 +82,10 @@ mainSelect()
        displayLevel2Menu
     ;; 
     9|J|j)
+       lvl1_selected_comp=docker
+       bash ${mainShellPath}/libs/components/docker/deploy_docker.sh
+    ;;
+    10|K|k)
        lvl1_selected_comp=displayDockers
        displayAllInstances
        mainSelect

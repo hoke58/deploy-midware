@@ -1,5 +1,5 @@
 FROM nginx:1.23.1-alpine
-LABEL maintainer="Hoke <hoke58@qq.com>, zhangfei" version="1.21.6-alpine-logrotate" date="06/06/2022"
+LABEL maintainer="Hoke <hoke58@qq.com>, zhangfei" version="1.23.1-alpine-logrotate" date="06/06/2022"
 
 COPY ./nginx_log.conf /etc/logrotate.d/
 RUN set -eux; \

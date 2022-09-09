@@ -15,7 +15,9 @@ consoleInit(){
  source ${mainShellPath}/libs/bin/01_displayMainMenu.sh
 }
 
-function main(){
+function main() {
+   # check if use bash shell
+   readlink /proc/$$/exe|grep -q "bash" || { colorEcho ${RED} "you should use bash shell, not sh"; exit 1; }
    consoleInit
    displayMainMenu
 }
