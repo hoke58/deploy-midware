@@ -7,5 +7,6 @@ RUN set -eux; \
     apk -U upgrade; \
     apk add --no-cache bash logrotate busybox-extras; \
     rm -rf /var/cache/apk/*; \
-    echo '0 1 * * * /usr/sbin/logrotate -f /etc/logrotate.d/nginx_log.conf && kill -USR1 `cat /etc/nginx/logs/nginx.pid` && /bin/chown -R ${HOST_UID}:${HOST_GID} /etc/nginx/logs/*.log'  > /var/spool/cron/crontabs/root
+    # echo '0 1 * * * /usr/sbin/logrotate -f /etc/logrotate.d/nginx_log.conf && kill -USR1 `cat /etc/nginx/logs/nginx.pid` && /bin/chown -R ${HOST_UID}:${HOST_GID} /etc/nginx/logs/*.log'  > /var/spool/cron/crontabs/root
+    echo '0 1 * * * /usr/sbin/logrotate -f /etc/logrotate.d/nginx_log.conf && kill -USR1 `cat /etc/nginx/logs/nginx.pid` > /var/spool/cron/crontabs/root
 CMD nginx && crond -f
