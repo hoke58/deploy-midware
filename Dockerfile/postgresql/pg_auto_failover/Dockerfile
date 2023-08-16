@@ -65,6 +65,8 @@ RUN apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     postgresql-server-dev-${PGVERSION} \
     postgresql-${PGVERSION} \
+    postgis \
+    postgresql-12-postgis-3 \
     ; \
     rm -rf /var/lib/apt/lists/*; \
     pip3 install pyroute2>=0.5.17 -i https://pypi.mirrors.ustc.edu.cn/simple/
@@ -148,7 +150,7 @@ RUN apt-get update; \
 # bypass initdb of a "main" cluster
     echo 'create_main_cluster = false' | sudo tee -a /etc/postgresql-common/createcluster.conf; \
     apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends postgresql-${PGVERSION} \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends postgresql-${PGVERSION} postgis postgresql-12-postgis-3 \
     ; \
     rm -rf /var/lib/apt/lists/*
 
